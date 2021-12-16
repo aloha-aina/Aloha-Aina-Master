@@ -284,19 +284,19 @@ paiko_wailupe_comp_2011 <- paiko_wailupe_comp %>%
   filter(year.x == 2011) %>% 
   filter(month.x == 12)
 
-ggplot(data = paiko_wailupe_comp_2011, aes(x = daily_pcp.x,
-                                      y = daily_pcp.y)) +
-  geom_point() +
-  theme_minimal() +
-  theme_minimal() +
-  labs(x = "Paiko",
-       y = "Wailupe Valley School",
-       title = "Daily Precipitation December 2011") +
-  geom_smooth(method='lm', formula = y~x) +
-  stat_regline_equation(label.x = 0.25,
-                        label.y = 1) +
-  stat_cor(label.x = 0.25,
-           label.y = 0.8)
+# ggplot(data = paiko_wailupe_comp_2011, aes(x = daily_pcp.x,
+#                                       y = daily_pcp.y)) +
+#   geom_point() +
+#   theme_minimal() +
+#   theme_minimal() +
+#   labs(x = "Paiko",
+#        y = "Wailupe Valley School",
+#        title = "Daily Precipitation December 2011") +
+#   geom_smooth(method='lm', formula = y~x) +
+#   stat_regline_equation(label.x = 0.25,
+#                         label.y = 1) +
+#   stat_cor(label.x = 0.25,
+#            label.y = 0.8)
 
 # yearly comparison
 paiko_wailupe_comp_yearly <- merge(paiko_yearly, wailupe_yearly, by = "year")
@@ -523,7 +523,7 @@ wailupe_nov_2009 <- wailupe_daily_77 %>%
 
 paiko_nov_2009 <- paiko_daily_76 %>% 
   filter(year == 2009) %>%
-  filter(date >= "2009-11-29" & date <= "2009-12-03")
+  filter(date >= "2009-11-29" & date <= "2009-12-04")
 
 ggplot() +
   geom_line(data = wailupe_nov_2009, aes(x = date,
