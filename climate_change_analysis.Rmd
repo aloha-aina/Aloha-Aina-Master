@@ -1,0 +1,222 @@
+---
+title: "Climate Change Projections: CNRM-ESM2-1"
+author: "Elmera Azadpour"
+date: "12/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(lubridate)
+library(ggpubr)
+library(zoo)
+```
+
+## read in climate data exported from jupyter notebook
+```{r}
+ssp245 = read.csv(here("climate_change_data","oahu_ssp245_2015_2100.csv")) %>% 
+  rename(date = dayofyear, pcp = pr) 
+ssp370 = read.csv(here("climate_change_data","oahu_ssp370_2015_2100.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+ssp585 = read.csv(here("climate_change_data","oahu_ssp585_2015_2100.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+
+
+ssp245$date <- ymd(ssp245$date)
+ssp370$date <- ymd(ssp370$date)
+ssp585$date <- ymd(ssp585$date)
+```
+
+```{r}
+ggplot() +
+  geom_line(data = ssp245, aes(x=date, y=pcp), size = 0.5,color="red") +
+  geom_line(data = ssp370, aes(x=date, y=pcp), size = 0.5, color = "blue") +
+  geom_line(data = ssp585, aes(x=date, y=pcp), size = 0.5, color = "seagreen") + 
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,7,1)) +
+  scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Avg Precipitation, CNRM-ESM2-1: 2015-2100") 
+
+
+
+
+## extra bit for regression 
+# +
+#   geom_smooth(method='lm', formula = y~x) +
+#   stat_regline_equation(label.x = 2015,
+#                         label.y = 6) +
+#   stat_cor(label.x = 10,
+#            label.y = 4)
+```
+
+## wrangling bits to group_by()
+```{r}
+# add seperate columns for year, month and day
+ssp245 <- ssp245 %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+ssp370 <- ssp370 %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+ssp585 <- ssp585  %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+
+# group by yearly sum of pcp 
+ssp245_yearly <- ssp245 %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+ssp245_yearly$year <- as.numeric(ssp245_yearly$year) 
+
+# group by yearly sum of pcp 
+ssp370_yearly <- ssp370 %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+ssp370_yearly$year <- as.numeric(ssp370_yearly$year) 
+
+# group by yearly sum of pcp 
+ssp585_yearly <- ssp585 %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+ssp585_yearly$year <- as.numeric(ssp585_yearly$year) 
+
+# group by month (and associated year) sum of pcp
+ssp245_monthly <- ssp245 %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct()
+
+ssp245_monthly$date <- format(as.Date(paste(ssp245_monthly$year, ssp245_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+ssp245_monthly$date <- my(ssp245_monthly$date)
+
+# group by yearly sum of daily avg pcp 
+ssp370_monthly <- ssp370 %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct() 
+  
+ssp370_monthly$date <- format(as.Date(paste(ssp370_monthly$year, ssp370_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+ssp370_monthly$date <- my(ssp370_monthly$date)
+
+# group by yearly sum of daily avg pcp 
+ssp585_monthly <- ssp585 %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct() 
+  
+ssp585_monthly$date <- format(as.Date(paste(ssp585_monthly$year, ssp585_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+ssp585_monthly$date <- my(ssp585_monthly$date)
+
+```
+
+
+## yearly analysis 
+```{r}
+ggplot() +
+  geom_line(data = ssp245_yearly, aes(x=year, y=sum), size = 0.5,color="red") +
+  geom_line(data = ssp370_yearly, aes(x=year, y=sum), size = 0.5, color = "blue") +
+  geom_line(data = ssp585_yearly, aes(x=year, y=sum), size = 0.5, color = "seagreen") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  # scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, CNRM-ESM2-1: 2015-2100")  +
+
+  geom_smooth(data = ssp245_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "red") + 
+  geom_smooth(data = ssp370_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "blue") + 
+  geom_smooth(data = ssp585_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") + 
+  stat_regline_equation(label.y = 45) +
+  stat_cor(label.y = 40)
+
+ggplot(data = ssp245_yearly, aes(x=year, y=sum)) +
+  geom_line(size = 0.5,color="red") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation,ssp245, CNRM-ESM2-1: 2015-2100") + 
+  geom_smooth(method='lm', formula = y~x, color = "red") +
+  stat_regline_equation(
+                        label.y = 45) +
+  stat_cor(
+           label.y = 40)
+  
+
+ggplot(data = ssp370_yearly, aes(x=year, y=sum)) +
+  geom_line(size = 0.5,color="blue") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp370, CNRM-ESM2-1: 2015-2100") + 
+  geom_smooth(method='lm', formula = y~x, color = "blue") +
+  stat_regline_equation(
+                        label.y = 45) +
+  stat_cor(
+           label.y = 40)
+
+ggplot(data = ssp585_yearly, aes(x=year, y=sum)) +
+  geom_line(size = 0.5,color="seagreen") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp585, CNRM-ESM2-1: 2015-2100") + 
+  geom_smooth(method='lm', formula = y~x, color = "seagreen") +
+  stat_regline_equation(
+                        label.y = 45) +
+  stat_cor(
+           label.y = 40)
+
+```
+
+
+## month by year analysis
+```{r}
+ggplot(data = ssp245_monthly, aes(x=date, y=sum)) +
+  geom_line(size = 0.5,color="red") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,20,5)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp245, CNRM-ESM2-1: 2015-2100") + 
+  geom_smooth(method='lm', formula = y~x, color = "red") +
+  stat_regline_equation(
+                        label.y = 20) +
+  stat_cor(
+           label.y = 15)
+
+ggplot(data = ssp370_monthly, aes(x=date, y=sum)) +
+  geom_line(size = 0.5,color="blue") +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,20,5)) +
+  scale_x_continuous(breaks=seq(2015,2100,10)) + 
+  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp370, CNRM-ESM2-1: 2015-2100") + 
+  geom_smooth(method='lm', formula = y~x, color = "blue") +
+  stat_regline_equation(
+                        label.y = 20) +
+  stat_cor(
+           label.y = 15)
+
+
+```
+
