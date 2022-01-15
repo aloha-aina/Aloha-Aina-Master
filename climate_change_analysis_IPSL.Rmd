@@ -1,0 +1,61 @@
+---
+title: "Climate Change Projections: IPSL-CM6A-LR"
+author: "Elmera Azadpour"
+date: "1/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(lubridate)
+library(ggpubr)
+library(zoo)
+```
+
+## read in daily total climate projection and historical data exported from jupyter notebook, code can be found here: https://github.com/aloha-aina/Aloha-Aina-Master 
+```{r}
+## Note: these data are from climate model IPSL-CM6A-LR (France)
+## daily totals
+ipsl_historical_tot = read.csv(here("climate_change_data", "IPSL_daily_tot","oahu_historical_1850_2014_total.csv")) %>%  
+  rename(date = dayofyear, pcp = pr) 
+ipsl_ssp126_tot = read.csv(here("climate_change_data","IPSL_daily_tot","oahu_ssp126_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr) 
+ipsl_ssp245_tot = read.csv(here("climate_change_data","IPSL_daily_tot","oahu_ssp245_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr) 
+ipsl_ssp370_tot = read.csv(here("climate_change_data","IPSL_daily_tot","oahu_ssp370_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+ipsl_ssp585_tot = read.csv(here("climate_change_data","IPSL_daily_tot","oahu_ssp585_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+
+ipsl_historical_tot$date <- ymd(ipsl_historical_tot$date)
+ipsl_ssp126_tot$date <- ymd(ipsl_ssp126_tot$date)
+ipsl_ssp245_tot$date <- ymd(ipsl_ssp245_tot$date)
+ipsl_ssp370_tot$date <- ymd(ipsl_ssp370_tot$date)
+ipsl_ssp585_tot$date <- ymd(ipsl_ssp585_tot$date)
+```
+
+## Daily total visualization 
+```{r}
+ipsl_daily_tot_proj <- 
+  ggplot() +
+  geom_line(data = ipsl_historical_tot, aes(x=date, y=pcp, color= "black"), size = 0.5) + 
+  geom_line(data = ipsl_ssp126_tot, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = ipsl_ssp245_tot, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = ipsl_ssp370_tot, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = ipsl_ssp585_tot, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,150,10)) +
+  scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, IPSL-CM6A-LR: 1850-2100") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen", "purple"), 
+                     labels = c("historical" , "spp126", "ssp245", "ssp370", "ssp585")) +
+  theme(legend.title=element_blank())+
+    theme(legend.position="bottom")
+
+ipsl_daily_tot_proj
+
+```

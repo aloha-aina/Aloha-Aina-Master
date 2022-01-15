@@ -1,0 +1,299 @@
+---
+title: "Climate Change Projections: BCC-CSM2-MR"
+author: "Elmera Azadpour"
+date: "1/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(lubridate)
+library(ggpubr)
+library(zoo)
+```
+
+## read in daily total climate projection and historical data exported from jupyter notebook, code can be found here: https://github.com/aloha-aina/Aloha-Aina-Master 
+```{r}
+## Note: these data are from climate model BCC-CSM2-MR (China)
+## daily totals
+bcc_historical_tot = read.csv(here("climate_change_data", "BCC_daily_tot","oahu_historical_1950_2014_total.csv")) %>%  
+  rename(date = dayofyear, pcp = pr) 
+bcc_ssp126_tot = read.csv(here("climate_change_data","BCC_daily_tot","oahu_ssp126_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr) 
+bcc_ssp245_tot = read.csv(here("climate_change_data","BCC_daily_tot","oahu_ssp245_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr) 
+bcc_ssp370_tot = read.csv(here("climate_change_data","BCC_daily_tot","oahu_ssp370_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+bcc_ssp585_tot = read.csv(here("climate_change_data","BCC_daily_tot","oahu_ssp585_2015_2100_total.csv")) %>% 
+  rename(date = dayofyear, pcp = pr)
+
+bcc_historical_tot$date <- ymd(bcc_historical_tot$date)
+bcc_ssp126_tot$date <- ymd(bcc_ssp126_tot$date)
+bcc_ssp245_tot$date <- ymd(bcc_ssp245_tot$date)
+bcc_ssp370_tot$date <- ymd(bcc_ssp370_tot$date)
+bcc_ssp585_tot$date <- ymd(bcc_ssp585_tot$date)
+```
+
+## Daily total visualization 
+```{r}
+bcc_daily_tot_proj <- 
+  ggplot() +
+  geom_line(data = bcc_historical_tot, aes(x=date, y=pcp, color= "black"), size = 0.5) + 
+  geom_line(data = bcc_ssp126_tot, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = bcc_ssp245_tot, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = bcc_ssp370_tot, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = bcc_ssp585_tot, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,150,10)) +
+  scale_x_date(date_breaks = "20 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, BCC-CSM2-MR: 1950-2100") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen", "purple"), 
+                     labels = c("historical" , "spp126", "ssp245", "ssp370", "ssp585")) +
+  theme(legend.title=element_blank())+
+    theme(legend.position="bottom")
+
+bcc_daily_tot_proj
+
+```
+
+## daily totals by month 
+```{r}
+# add seperate columns for year, month and day
+bcc_historical_tot <- bcc_historical_tot %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+bcc_ssp126_tot <- bcc_ssp126_tot %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+bcc_ssp245_tot <- bcc_ssp245_tot %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+bcc_ssp370_tot <- bcc_ssp370_tot %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+bcc_ssp585_tot <- bcc_ssp585_tot  %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date))
+
+
+# group by yearly sum of pcp 
+bcc_historical_tot_yearly <- bcc_historical_tot %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+bcc_historical_tot_yearly$year <- as.numeric(bcc_historical_tot_yearly$year) 
+
+
+# group by yearly sum of pcp 
+bcc_ssp126_tot_yearly <- bcc_ssp126_tot %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+bcc_ssp126_tot_yearly$year <- as.numeric(bcc_ssp126_tot_yearly$year) 
+
+# group by yearly sum of pcp 
+bcc_ssp245_tot_yearly <- bcc_ssp245_tot %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+bcc_ssp245_tot_yearly$year <- as.numeric(bcc_ssp245_tot_yearly$year) 
+
+# group by yearly sum of pcp 
+bcc_ssp370_tot_yearly <- bcc_ssp370_tot %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+bcc_ssp370_tot_yearly$year <- as.numeric(bcc_ssp370_tot_yearly$year) 
+
+# group by yearly sum of pcp 
+bcc_ssp585_tot_yearly <- bcc_ssp585_tot %>% 
+  group_by(year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(year, sum) %>% 
+  distinct()
+
+bcc_ssp585_tot_yearly$year <- as.numeric(bcc_ssp585_tot_yearly$year) 
+
+
+# group by month (and associated year) sum of pcp
+bcc_historical_tot_monthly <- bcc_historical_tot %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct()
+
+bcc_historical_tot_monthly$date <- format(as.Date(paste(bcc_historical_tot_monthly$year, bcc_historical_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+bcc_historical_tot_monthly$date <- my(bcc_historical_tot_monthly$date)
+
+
+# group by month (and associated year) sum of pcp
+bcc_ssp126_tot_monthly <- bcc_ssp126_tot %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct()
+
+bcc_ssp126_tot_monthly$date <- format(as.Date(paste(bcc_ssp126_tot_monthly$year, bcc_ssp126_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+bcc_ssp126_tot_monthly$date <- my(bcc_ssp126_tot_monthly$date)
+
+
+# group by month (and associated year) sum of pcp
+bcc_ssp245_tot_monthly <- bcc_ssp245_tot %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct()
+
+bcc_ssp245_tot_monthly$date <- format(as.Date(paste(bcc_ssp245_tot_monthly$year, bcc_ssp245_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+bcc_ssp245_tot_monthly$date <- my(bcc_ssp245_tot_monthly$date)
+
+# group by yearly sum of daily avg pcp 
+bcc_ssp370_tot_monthly <- bcc_ssp370_tot %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct() 
+  
+bcc_ssp370_tot_monthly$date <- format(as.Date(paste(bcc_ssp370_tot_monthly$year, bcc_ssp370_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+bcc_ssp370_tot_monthly$date <- my(bcc_ssp370_tot_monthly$date)
+
+# group by yearly sum of daily avg pcp 
+bcc_ssp585_tot_monthly <- bcc_ssp585_tot %>% 
+  group_by(month,year) %>% 
+  mutate(sum = sum(pcp)) %>% 
+  select(month, year, sum) %>% 
+  distinct() 
+  
+bcc_ssp585_tot_monthly$date <- format(as.Date(paste(bcc_ssp585_tot_monthly$year, bcc_ssp585_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+
+bcc_ssp585_tot_monthly$date <- my(bcc_ssp585_tot_monthly$date)
+```
+
+## yearly total for all ssps and historical
+```{r}
+## all three ssps 
+bcc_yearly_sum_proj <- 
+  ggplot() +
+  geom_line(data = bcc_historical_tot_yearly, aes(x=year, y=sum, color="black"), size = 0.5) +
+  geom_line(data = bcc_ssp126_tot_yearly, aes(x=year, y=sum, color="orange"), size = 0.5) + 
+  geom_line(data = bcc_ssp245_tot_yearly, aes(x=year, y=sum, color="red"), size = 0.5) +
+  geom_line(data = bcc_ssp370_tot_yearly, aes(x=year, y=sum, color = "blue"), size = 0.5) +
+  geom_line(data = bcc_ssp585_tot_yearly, aes(x=year, y=sum, color = "seagreen"), size = 0.5) +
+  theme_minimal() + 
+  #scale_y_continuous(breaks=seq(0,450,50)) +
+  scale_x_continuous(breaks=seq(1950,2100,50)) + 
+  # scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Yearly Total Precipitation, BCC-CSM2-MR: 1950-2100") + 
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "ssp126", "ssp245", "ssp370", "ssp585")) +
+  labs(x = "Year",
+       y = "Precipitation (in)") +
+  geom_smooth(data = bcc_historical_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "black") +
+  geom_smooth(data = bcc_ssp126_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "orange") + 
+  geom_smooth(data = bcc_ssp245_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "red") + 
+  geom_smooth(data = bcc_ssp370_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "blue") + 
+  geom_smooth(data = bcc_ssp585_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") +
+  theme(legend.title=element_blank())+
+    theme(legend.position="bottom")
+# +
+#   stat_regline_equation(label.y = 400) +
+#   stat_cor(label.y = 400)
+
+bcc_yearly_sum_proj
+```
+
+```{r}
+# all three ssps 
+bcc_monthly_sum_proj <- 
+  ggplot() +
+  geom_line(data = bcc_historical_tot_monthly, aes(x=date, y=sum, color="black"), size = 0.5) +
+  geom_line(data = bcc_ssp126_tot_monthly, aes(x=date, y=sum, color="orange"), size = 0.5) + 
+  geom_line(data = bcc_ssp245_tot_monthly, aes(x=date, y=sum, color="red"), size = 0.5) +
+  geom_line(data = bcc_ssp370_tot_monthly, aes(x=date, y=sum, color = "blue"), size = 0.5) +
+  geom_line(data = bcc_ssp585_tot_monthly, aes(x=date, y=sum, color = "seagreen"), size = 0.5) +
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,300,50)) +
+  #scale_x_continuous(breaks=seq(1850,2100,50)) + 
+ scale_x_date(date_breaks = "50 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Monthly Total Precipitation, BCC-CSM2-MR: 1950-2100") + 
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "ssp126", "ssp245", "ssp370", "ssp585")) +
+  labs(x = "Year",
+       y = "Precipitation (in)") +
+  # geom_smooth(data = bcc_historical_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "black") +
+  # geom_smooth(data = bcc_ssp126_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "orange") +
+  # geom_smooth(data = bcc_ssp245_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "red") +
+  # geom_smooth(data = bcc_ssp370_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "blue") +
+  # geom_smooth(data = bcc_ssp585_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "seagreen") +
+  theme(legend.title=element_blank())+
+    theme(legend.position="bottom")
+  
+  # stat_regline_equation(label.y = 200) +
+  # stat_cor(label.y = 190)
+
+bcc_monthly_sum_proj
+```
+
+```{r}
+## separate historical total precip based on 30 yr time periods
+bcc_historical_tot_1984_2014 <- bcc_historical_tot %>% 
+  filter(year %in% (1984:2014))
+  
+## separate projections based on 2020 to 2070
+bcc_ssp126_tot_2020_2050 <- bcc_ssp126_tot %>% 
+  filter(year %in% (2020:2050))
+
+bcc_ssp245_tot_2020_2050 <- bcc_ssp245_tot %>% 
+  filter(year %in% (2020:2050))
+
+bcc_ssp370_tot_2020_2050 <- bcc_ssp370_tot %>% 
+  filter(year %in% (2020:2050))
+
+bcc_ssp585_tot_2020_2050 <- bcc_ssp585_tot %>% 
+  filter(year %in% (2020:2050))
+
+
+bcc_daily_tot_period <- 
+  ggplot() +
+  geom_line(data = bcc_ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = bcc_ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = bcc_ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = bcc_ssp585_tot_2020_2050, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
+  scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, BCC-CSM2-MR: 2020-2050") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("orange", "red", "blue", "seagreen"), labels = c("spp126", "ssp245", "ssp370", "ssp585"))+
+   theme(legend.title=element_blank())+
+    theme(legend.position="bottom") +
+    theme(text = element_text(size=14))
+
+bcc_daily_tot_period
+
+# ggsave('bcc_daily_tot_period.png', bcc_daily_tot_period, width = 12, height = 10, units = "in")
+```

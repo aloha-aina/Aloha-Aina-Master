@@ -14,30 +14,31 @@ library(ggpubr)
 library(zoo)
 ```
 
-## read in daily avg climate data exported from jupyter notebook, code can be found here: https://github.com/aloha-aina/Aloha-Aina-Master 
+## read in daily avg and total climate data projection and historical data exported from jupyter notebook, code can be found here: https://github.com/aloha-aina/Aloha-Aina-Master 
 ```{r}
+## Note: these data are from climate model CNRM-ESM2-1 (France)
 ## daily avgs
-historical = read.csv(here("climate_change_data","daily_avg","oahu_historical_1850_2014_avg.csv")) %>%  
+historical = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_historical_1850_2014_avg.csv")) %>%  
   rename(date = dayofyear, pcp = pr) 
-ssp126 = read.csv(here("climate_change_data","daily_avg","oahu_ssp126_2015_2100_avg.csv")) %>% 
+ssp126 = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_ssp126_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp245 = read.csv(here("climate_change_data","daily_avg","oahu_ssp245_2015_2100_avg.csv")) %>% 
+ssp245 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp245_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp370 = read.csv(here("climate_change_data","daily_avg","oahu_ssp370_2015_2100_avg.csv")) %>% 
+ssp370 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp370_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
-ssp585 = read.csv(here("climate_change_data","daily_avg","oahu_ssp585_2015_2100_avg.csv")) %>% 
+ssp585 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp585_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
 
 ## daily totals
-historical_tot = read.csv(here("climate_change_data","daily_tot","oahu_historical_1850_2014_total.csv")) %>%  
+historical_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_historical_1850_2014_total.csv")) %>%  
   rename(date = dayofyear, pcp = pr) 
-ssp126_tot = read.csv(here("climate_change_data","daily_tot","oahu_ssp126_2015_2100_total.csv")) %>% 
+ssp126_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_ssp126_2015_2100_total.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp245_tot = read.csv(here("climate_change_data","daily_tot","oahu_ssp245_2015_2100_total.csv")) %>% 
+ssp245_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_ssp245_2015_2100_total.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp370_tot = read.csv(here("climate_change_data","daily_tot","oahu_ssp370_2015_2100_total.csv")) %>% 
+ssp370_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_ssp370_2015_2100_total.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
-ssp585_tot = read.csv(here("climate_change_data","daily_tot","oahu_ssp585_2015_2100_total.csv")) %>% 
+ssp585_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_ssp585_2015_2100_total.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
 
 ## convert date column to year, month, day components using luberdate package
@@ -900,54 +901,57 @@ monthly_sum_proj
 ```
 
 ```{r}
-## separate historical total precip based on 50 yr time periods
-historical_tot_1900_1950 <- historical_tot %>% 
-  filter(year %in% (1900:1950))
+## separate historical total precip based on 30 yr time periods
+historical_tot_1984_2014 <- historical_tot %>% 
+  filter(year %in% (1984:2014))
   
 ## separate projections based on 2020 to 2070
-ssp126_tot_2020_2070 <- ssp126_tot %>% 
-  filter(year %in% (2020:2070))
+ssp126_tot_2020_2050 <- ssp126_tot %>% 
+  filter(year %in% (2020:2050))
 
-ssp245_tot_2020_2070 <- ssp245_tot %>% 
-  filter(year %in% (2020:2070))
+ssp245_tot_2020_2050 <- ssp245_tot %>% 
+  filter(year %in% (2020:2050))
 
-ssp370_tot_2020_2070 <- ssp370_tot %>% 
-  filter(year %in% (2020:2070))
+ssp370_tot_2020_2050 <- ssp370_tot %>% 
+  filter(year %in% (2020:2050))
 
-ssp585_tot_2020_2070 <- ssp585_tot %>% 
-  filter(year %in% (2020:2070))
+ssp585_tot_2020_2050 <- ssp585_tot %>% 
+  filter(year %in% (2020:2050))
 
 
 daily_tot_period <- 
   ggplot() +
-  geom_line(data = ssp126_tot_2020_2070, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
-  geom_line(data = ssp245_tot_2020_2070, aes(x=date, y=pcp, color="red"), size = 0.5) +
-  geom_line(data = ssp370_tot_2030_2070, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
-  geom_line(data = ssp585_tot_2020_2070, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  geom_line(data = ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = ssp585_tot_2020_2050, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
   theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
   scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 2020-2070") +
+  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 2020-2050") +
    labs(x = "Year",
        y = "Precipitation (in)") +
   scale_color_manual(values = c("orange", "red", "blue", "seagreen"), labels = c("spp126", "ssp245", "ssp370", "ssp585"))+
    theme(legend.title=element_blank())+
-    theme(legend.position="bottom")
+    theme(legend.position="bottom")+
+    theme(text = element_text(size=14))
 
 daily_tot_period
+
+ggsave('cnrm_daily_tot_period.png', daily_tot_period, width = 12, height = 10, units = "in")
 ```
 ## historical 50 year period graph
 ```{r}
 daily_tot_period_hist <- 
   ggplot() +
-  geom_line(data = historical_tot_1900_1950, aes(x=date, y=pcp, color="purple"), size = 0.5) +  
+  geom_line(data = historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +  
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
   scale_x_date(date_breaks = "3.5 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1, historical: 1900-1950 ") +
+  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1, historical: 1984-2014 ") +
    labs(x = "Year",
        y = "Precipitation (in)") +
-  scale_color_manual(values = c("purple"), labels = c("historical")) + 
+  scale_color_manual(values = c("black"), labels = c("historical")) + 
  theme(legend.title=element_blank()) +
     theme(legend.position="bottom")
 
@@ -957,31 +961,63 @@ daily_tot_period_hist
 ## ratio of daily total precipitation in the future vs. historical periods
 ```{r}
 ## first lets merge the data frames together 
-daily_tot_prec_merge1 <- ssp126_tot_2020_2070 %>% right_join(ssp245_tot_2020_2070, by = c("date")) 
-daily_tot_prec_merge2 <- daily_tot_prec_merge1 %>%  right_join(ssp370_tot_2020_2070, by = c("date"))
-daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(ssp585_tot_2020_2070,by = c("date")) %>% 
+daily_tot_prec_merge1 <- ssp126_tot_2020_2050 %>% right_join(ssp245_tot_2020_2050, by = c("date")) 
+daily_tot_prec_merge2 <- daily_tot_prec_merge1 %>%  right_join(ssp370_tot_2020_2050, by = c("date"))
+daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(ssp585_tot_2020_2050,by = c("date")) %>% 
   select(date, year.x, month.x, day.x, pcp.x, pcp.y, pcp.x.x, pcp.y.y) %>% 
   rename(year = year.x,
          month = month.x,
+         day = day.x,
          ssp126_pcp=pcp.x,
          ssp245_pcp=pcp.y,
          ssp370_pcp = pcp.x.x ,
          ssp585_pcp = pcp.y.y )
 
-historical_tot_1900_1950_rename <- historical_tot_1900_1950 %>% 
+historical_tot_1984_2014_rename <- historical_tot_1984_2014 %>% 
   rename(hist_date = date,
          hist_pcp = pcp,
          hist_year = year,
          hist_month = month,
          hist_day = day)
 
-merge_his_proj <- cbind(daily_tot_prec_merge_fin, historical_tot_1900_1950_rename) 
+merge_his_proj <- cbind(daily_tot_prec_merge_fin, historical_tot_1984_2014_rename) 
 
 ratio_df <- merge_his_proj %>% 
   mutate(ssp126_hist = ssp126_pcp/hist_pcp,
          ssp245_hist = ssp245_pcp/hist_pcp,
          ssp370_hist = ssp370_pcp/hist_pcp,
          ssp585_hist = ssp585_pcp/hist_pcp) %>% 
-  select(date, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) 
+  select(date, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+ggplot(data = ratio_df, aes(x=date, y=fut_hist_ratio,  group=ssp)) +
+  geom_boxplot() +
+  facet_wrap(~ssp)
+  scale_y_continuous(limits = c(0,0.0e+00))
 ```
 
+## look at analogeous storm event we will use for swimm 2009-10-11
+```{r}
+merge_his_proj_filt <- merge_his_proj %>% 
+  filter(month == "10") %>% 
+  filter(day == "11") %>% 
+  mutate(ssp126_hist = ssp126_pcp/hist_pcp,
+         ssp245_hist = ssp245_pcp/hist_pcp,
+         ssp370_hist = ssp370_pcp/hist_pcp,
+         ssp585_hist = ssp585_pcp/hist_pcp) %>% 
+  select(date, year, month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+
+ggplot(data = merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
+  geom_boxplot() +
+  facet_wrap(~ssp) +
+  theme_minimal() +
+  labs(x="Year", y="Future Projections/Historical Ratio (Oct 11)")
+  #scale_y_continuous(limits = c(0,0.0e+00)
+                     
+```
