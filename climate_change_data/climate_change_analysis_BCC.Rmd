@@ -225,7 +225,7 @@ bcc_yearly_sum_proj <-
 
 bcc_yearly_sum_proj
 ```
-
+## monthly totals 
 ```{r}
 # all three ssps 
 bcc_monthly_sum_proj <- 
@@ -256,9 +256,8 @@ bcc_monthly_sum_proj <-
 
 bcc_monthly_sum_proj
 ```
-
-```{r}
 ## separate historical total precip based on 30 yr time periods
+```{r}
 bcc_historical_tot_1984_2014 <- bcc_historical_tot %>% 
   filter(year %in% (1984:2014))
   
@@ -278,6 +277,7 @@ bcc_ssp585_tot_2020_2050 <- bcc_ssp585_tot %>%
 
 bcc_daily_tot_period <- 
   ggplot() +
+  geom_line(data = bcc_historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) + 
   geom_line(data = bcc_ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
   geom_line(data = bcc_ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
   geom_line(data = bcc_ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
@@ -285,15 +285,114 @@ bcc_daily_tot_period <-
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
   scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, BCC-CSM2-MR: 2020-2050") +
+  ggtitle("Oahu, HI Daily Total Precipitation, BCC-CSM2-MR: 1984-2050") +
    labs(x = "Year",
        y = "Precipitation (in)") +
-  scale_color_manual(values = c("orange", "red", "blue", "seagreen"), labels = c("spp126", "ssp245", "ssp370", "ssp585"))+
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "spp126", "ssp245", "ssp370", "ssp585")) +
    theme(legend.title=element_blank())+
     theme(legend.position="bottom") +
     theme(text = element_text(size=14))
 
 bcc_daily_tot_period
 
-# ggsave('bcc_daily_tot_period.png', bcc_daily_tot_period, width = 12, height = 10, units = "in")
+#ggsave('bcc_daily_tot_period.png', bcc_daily_tot_period, width = 12, height = 8, units = "in")
+
 ```
+
+## historical 50 year period graph
+```{r}
+bcc_daily_tot_period_hist <- 
+  ggplot() +
+  geom_line(data = bcc_historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +  
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_date(date_breaks = "3.5 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, BCC-CSM2-MR, historical: 1984-2014 ") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("black"), labels = c("historical")) + 
+ theme(legend.title=element_blank()) +
+    theme(legend.position="bottom")
+
+bcc_daily_tot_period_hist
+```
+
+## ratio of daily total precipitation in the future vs. historical periods
+```{r}
+## merge the data frames together 
+bcc_daily_tot_prec_merge1 <- bcc_ssp126_tot_2020_2050 %>% right_join(bcc_ssp245_tot_2020_2050, by = c("date")) 
+bcc_daily_tot_prec_merge2 <- bcc_daily_tot_prec_merge1 %>%  right_join(bcc_ssp370_tot_2020_2050, by = c("date"))
+bcc_daily_tot_prec_merge_fin <- bcc_daily_tot_prec_merge2 %>% right_join(bcc_ssp585_tot_2020_2050,by = c("date")) %>% 
+  select(date, year.x, month.x, day.x, pcp.x, pcp.y, pcp.x.x, pcp.y.y) %>% 
+  rename(year = year.x,
+         month = month.x,
+         day = day.x,
+         ssp126_pcp=pcp.x,
+         ssp245_pcp=pcp.y,
+         ssp370_pcp = pcp.x.x ,
+         ssp585_pcp = pcp.y.y )
+
+bcc_historical_tot_1984_2014_rename <- bcc_historical_tot_1984_2014 %>% 
+  rename(hist_date = date,
+         hist_pcp = pcp,
+         hist_year = year,
+         hist_month = month,
+         hist_day = day)
+
+bcc_merge_his_proj <- cbind(bcc_daily_tot_prec_merge_fin, bcc_historical_tot_1984_2014_rename) 
+
+bcc_ratio_df <- bcc_merge_his_proj %>% 
+  mutate(ssp126_hist = ssp126_pcp/hist_pcp,
+         ssp245_hist = ssp245_pcp/hist_pcp,
+         ssp370_hist = ssp370_pcp/hist_pcp,
+         ssp585_hist = ssp585_pcp/hist_pcp) %>% 
+  select(date, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+ggplot(data = bcc_ratio_df, aes(x=date, y=fut_hist_ratio,  group=ssp)) +
+  geom_boxplot() +
+  facet_wrap(~ssp)
+  #scale_y_continuous(limits = c(0,0.0e+00))
+```
+
+
+## look at analogeous storm event we will use for swmm 2009-10-11
+```{r}
+ssp_names <- c(
+                    `ssp126_hist` = "ssp 1-2.6",
+                    `ssp245_hist` = "ssp 2-4.5",
+                    `ssp370_hist` = "ssp 3-7.0",
+                    `ssp585_hist` = "ssp 5-8.5"
+                    )
+
+bcc_merge_his_proj_filt <- bcc_merge_his_proj %>% 
+  filter(month == "10") %>% 
+  filter(day == "11") %>% 
+  mutate(ssp126_hist = ssp126_pcp/hist_pcp,
+         ssp245_hist = ssp245_pcp/hist_pcp,
+         ssp370_hist = ssp370_pcp/hist_pcp,
+         ssp585_hist = ssp585_pcp/hist_pcp) %>% 
+  select(date, year, month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+
+proj_hist_oct11_BCC <- ggplot(data = bcc_merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
+  geom_boxplot() +
+  facet_wrap(~ssp, labeller = as_labeller(ssp_names)) +
+  theme_minimal() +
+  labs(x="Year", 
+       y="Future Projection/Historical Daily Total Ratio (Oct 11)", 
+       caption = "Data Source: BCC-CSM2-MR") +
+  scale_y_continuous(limits = c(0,30)) +
+    theme(text = element_text(size=15))
+
+proj_hist_oct11_BCC
+
+#ggsave('proj_hist_oct11_BCC.png', proj_hist_oct11_BCC, width = 12, height = 10, units = "in")
+                     
+```
+

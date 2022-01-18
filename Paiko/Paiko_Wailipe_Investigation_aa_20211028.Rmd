@@ -660,3 +660,16 @@ ggplot() +
 
 ```
 
+```{r}
+wailupe77_2009_10_11 <- wailupe_tidy_77 %>% 
+  filter(date == c("2009-10-11"))
+
+ggplot() +
+  geom_point(data = wailupe77_2009_10_11, aes(x = time,
+                                         y = qgag,
+                                         color = "red")) +
+  theme_minimal()
+
+
+```
+

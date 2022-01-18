@@ -921,6 +921,7 @@ ssp585_tot_2020_2050 <- ssp585_tot %>%
 
 daily_tot_period <- 
   ggplot() +
+  geom_line(data = historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +
   geom_line(data = ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
   geom_line(data = ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
   geom_line(data = ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
@@ -928,18 +929,19 @@ daily_tot_period <-
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
   scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 2020-2050") +
+  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 1984-2050") +
    labs(x = "Year",
        y = "Precipitation (in)") +
-  scale_color_manual(values = c("orange", "red", "blue", "seagreen"), labels = c("spp126", "ssp245", "ssp370", "ssp585"))+
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "spp126", "ssp245", "ssp370", "ssp585"))+
    theme(legend.title=element_blank())+
     theme(legend.position="bottom")+
     theme(text = element_text(size=14))
 
 daily_tot_period
 
-ggsave('cnrm_daily_tot_period.png', daily_tot_period, width = 12, height = 10, units = "in")
+# ggsave('cnrm_daily_tot_period.png', daily_tot_period, width = 12, height = 8, units = "in")
 ```
+
 ## historical 50 year period graph
 ```{r}
 daily_tot_period_hist <- 
@@ -960,7 +962,7 @@ daily_tot_period_hist
 
 ## ratio of daily total precipitation in the future vs. historical periods
 ```{r}
-## first lets merge the data frames together 
+## merge the data frames together 
 daily_tot_prec_merge1 <- ssp126_tot_2020_2050 %>% right_join(ssp245_tot_2020_2050, by = c("date")) 
 daily_tot_prec_merge2 <- daily_tot_prec_merge1 %>%  right_join(ssp370_tot_2020_2050, by = c("date"))
 daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(ssp585_tot_2020_2050,by = c("date")) %>% 
@@ -998,7 +1000,7 @@ ggplot(data = ratio_df, aes(x=date, y=fut_hist_ratio,  group=ssp)) +
   scale_y_continuous(limits = c(0,0.0e+00))
 ```
 
-## look at analogeous storm event we will use for swimm 2009-10-11
+## look at analogeous storm event we will use for swmm 2009-10-11
 ```{r}
 merge_his_proj_filt <- merge_his_proj %>% 
   filter(month == "10") %>% 
@@ -1013,11 +1015,26 @@ merge_his_proj_filt <- merge_his_proj %>%
                values_to = "fut_hist_ratio")
 
 
-ggplot(data = merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
+ssp_names <- c(
+                    `ssp126_hist` = "ssp 1-2.6",
+                    `ssp245_hist` = "ssp 2-4.5",
+                    `ssp370_hist` = "ssp 3-7.0",
+                    `ssp585_hist` = "ssp 5-8.5"
+                    )
+
+
+proj_hist_oct11_CRNM<- ggplot(data = merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
   geom_boxplot() +
-  facet_wrap(~ssp) +
+  facet_wrap(~ssp, labeller = as_labeller(ssp_names)) +
   theme_minimal() +
-  labs(x="Year", y="Future Projections/Historical Ratio (Oct 11)")
-  #scale_y_continuous(limits = c(0,0.0e+00)
+  labs(x="Year", 
+       y="Future Projection/Historical Daily Total Ratio (Oct 11)", 
+       caption = "Data Source: CNRM-ESM2-1") +
+  scale_y_continuous(limits = c(0,30)) +
+    theme(text = element_text(size=15))
+
+proj_hist_oct11_CRNM
+
+#ggsave('proj_hist_oct11_CRNM.png', proj_hist_oct11_CRNM, width = 12, height = 10, units = "in")
                      
 ```
