@@ -397,3 +397,79 @@ proj_hist_oct11_IPSL
                      
 ```
 
+## December 19, 2010 = Wailupe storm that we will use to do CC analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
+```{r}
+ipsl_merge_his_proj_filt_dec19 <- ipsl_merge_his_proj %>%
+  filter(month == "12") %>%
+  filter(day == "19") %>%
+  group_by(month,day) %>%
+  mutate(ssp126_pcp_avg = mean(ssp126_pcp),
+         ssp245_pcp_avg = mean(ssp245_pcp),
+         ssp370_pcp_avg = mean(ssp370_pcp),
+         ssp585_pcp_avg = mean(ssp585_pcp),
+         hist_pcp_avg = mean(hist_pcp)) %>%
+  select(month,day,ssp126_pcp_avg,ssp245_pcp_avg,ssp370_pcp_avg, ssp585_pcp_avg, hist_pcp_avg ) %>%
+  distinct()
+
+
+ipsl_merge_his_proj_filt_dec19 <- ipsl_merge_his_proj_filt_dec19 %>%
+  mutate(ssp126_hist = ssp126_pcp_avg/hist_pcp_avg,
+         ssp245_hist = ssp245_pcp_avg/hist_pcp_avg,
+         ssp370_hist = ssp370_pcp_avg/hist_pcp_avg,
+         ssp585_hist = ssp585_pcp_avg/hist_pcp_avg) %>%
+  select(month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>%
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+proj_hist_dec19_ipsl <- ggplot(data = ipsl_merge_his_proj_filt_dec19, aes(x=ssp, y=fut_hist_ratio)) +
+  geom_point(size=2) +
+  theme_minimal() +
+  labs(x="Shared Socioeconomic Pathways (ssp)",
+       y="Future Projection/Historical Daily Total Average Ratio (Dec 19)",
+       caption = "Climate Model: IPSL-CM6A-LR") +
+    theme(text = element_text(size=15)) +
+  scale_x_discrete(labels=c("ssp126_hist" = "ssp 1-2.6",
+                            "ssp245_hist" = "ssp 2-4.5",
+                              "ssp370_hist" = "ssp 3-7.0",
+                            "ssp585_hist" = "ssp 5-8.5")) + 
+  scale_y_continuous(limits = c(0,3.5))
+
+proj_hist_dec19_ipsl
+
+# ggsave('proj_hist_dec19_ipsl.png', proj_hist_dec19_ipsl, width = 12, height = 10, units = "in")
+
+```
+
+
+## merging all climate model future/historical ratios (note: you will need to have run climate_change_analysis.Rmd for all climate models) to plot box plot
+```{r}
+futhis_ratio_combine <- merge_his_proj_filt_dec19 %>%
+  rbind(bcc_merge_his_proj_filt_dec19, ipsl_merge_his_proj_filt_dec19) %>% 
+  mutate(model = c("CNRM"))
+
+futhis_ratio_combine$model[c(5:8)] = "BCC"
+futhis_ratio_combine$model[c(9:12)] = "IPSL"
+
+combine_ratio_plot <- ggplot(data = futhis_ratio_combine, aes(x=ssp, y=fut_hist_ratio)) +
+  geom_boxplot() +
+  geom_point(aes(color=model))+
+  theme_minimal() +
+  labs(x="Shared Socioeconomic Pathways (ssp)",
+       y="Future Projection/Historical Daily Total Average Ratio (Dec 19)",
+       caption = "CMIP6 Models: BCC-CSM2-MR, CNRM-ESM2-1, IPSL-CM6A-LR") +
+    theme(text = element_text(size=15)) +
+  scale_x_discrete(labels=c("ssp126_hist" = "ssp 1-2.6",
+                            "ssp245_hist" = "ssp 2-4.5",
+                              "ssp370_hist" = "ssp 3-7.0",
+                            "ssp585_hist" = "ssp 5-8.5")) + 
+  scale_y_continuous(limits = c(0,3.5)) +
+  scale_color_discrete(name = "Model") +
+    theme(legend.position="bottom")
+
+combine_ratio_plot
+
+#ggsave('combined_ratio_plot.png', combine_ratio_plot, width = 12, height = 10, units = "in")
+
+```
+
