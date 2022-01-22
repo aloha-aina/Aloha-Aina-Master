@@ -1039,7 +1039,7 @@ proj_hist_oct11_CRNM
                      
 ```
 
-## December 19, 2010 = Wailupe storm that we will use to do CC analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
+## December 19, 2010 = One Wailupe storm that we will use to do CC analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
 ```{r}
 merge_his_proj_filt_dec19 <- merge_his_proj %>% 
   filter(month == "12") %>% 
@@ -1080,6 +1080,50 @@ proj_hist_dec19_cnrm <- ggplot(data = merge_his_proj_filt_dec19, aes(x=ssp, y=fu
 proj_hist_dec19_cnrm
 
  # ggsave('proj_hist_dec19_cnrm.png', proj_hist_dec19_cnrm, width = 12, height = 10, units = "in")
+
+```
+
+## March 14, 2009 = Another Wailupe storm that we will use to do CC analysis with. 
+```{r}
+merge_his_proj_filt_mar14 <- merge_his_proj %>% 
+  filter(month == "3") %>% 
+  filter(day == "14") %>% 
+  group_by(month,day) %>% 
+  mutate(ssp126_pcp_avg = mean(ssp126_pcp),
+         ssp245_pcp_avg = mean(ssp245_pcp),
+         ssp370_pcp_avg = mean(ssp370_pcp),
+         ssp585_pcp_avg = mean(ssp585_pcp),
+         hist_pcp_avg = mean(hist_pcp)) %>% 
+  select(month,day,ssp126_pcp_avg,ssp245_pcp_avg,ssp370_pcp_avg, ssp585_pcp_avg, hist_pcp_avg ) %>% 
+  distinct()
+
+
+merge_his_proj_filt_mar14 <- merge_his_proj_filt_mar14 %>% 
+  mutate(ssp126_hist = ssp126_pcp_avg/hist_pcp_avg,
+         ssp245_hist = ssp245_pcp_avg/hist_pcp_avg,
+         ssp370_hist = ssp370_pcp_avg/hist_pcp_avg,
+         ssp585_hist = ssp585_pcp_avg/hist_pcp_avg) %>% 
+  select(month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
+  pivot_longer(cols = ssp126_hist:ssp585_hist,
+               names_to = c("ssp"),
+               values_to = "fut_hist_ratio")
+
+proj_hist_mar14_cnrm <- ggplot(data = merge_his_proj_filt_mar14, aes(x=ssp, y=fut_hist_ratio)) +
+  geom_point(size=2) +
+  theme_minimal() +
+  labs(x="Shared Socioeconomic Pathways (ssp)", 
+       y="Future Projection/Historical Daily Total Average Ratio (Mar 14)", 
+       caption = "Climate Model: CNRM-ESM2-1") +
+    theme(text = element_text(size=15)) +
+  scale_x_discrete(labels=c("ssp126_hist" = "ssp 1-2.6", 
+                            "ssp245_hist" = "ssp 2-4.5",
+                              "ssp370_hist" = "ssp 3-7.0",
+                            "ssp585_hist" = "ssp 5-8.5")) +
+  scale_y_continuous(limits = c(0,3.5))
+
+proj_hist_mar14_cnrm
+
+ # ggsave('proj_hist_mar14_cnrm.png', proj_hist_mar14_cnrm, width = 12, height = 10, units = "in")
 
 ```
 
