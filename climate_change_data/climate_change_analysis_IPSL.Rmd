@@ -505,23 +505,24 @@ combine_ratio_plot_dec19 <- ggplot(data = futhis_ratio_combine_dec19, aes(x=ssp,
   geom_point(aes(color=model), size =6)+
   theme_minimal() +
   labs(x="Shared Socioeconomic Pathways (SSP)",
-       y="Future Projection/Historical Daily Total Average Ratio (Dec 19)",
-       caption = "CMIP6 Models: BCC-CSM2-MR, CNRM-ESM2-1, IPSL-CM6A-LR") +
+       y="Multiplicative Change Factor (MCF)") +
+  ggtitle("December 19th Wailupe Storm Event") +
     theme(text = element_text(size=22)) +
   scale_x_discrete(labels=c("ssp126_hist" = "SSP 1-2.6",
                             "ssp245_hist" = "SSP 2-4.5",
                               "ssp370_hist" = "SSP 3-7.0",
                             "ssp585_hist" = "SSP 5-8.5")) + 
  scale_y_continuous(breaks=(seq(0, 3.5, .5)), limits = c(0, 3.5))  +
-  theme(legend.title = element_blank())  +
+  guides(color=guide_legend("CMIP6 Model"))  +
     theme(legend.position="bottom") +
-   scale_colour_manual(values=cbp2) +
-  theme(text=element_text(color="black"),axis.text=element_text(color="black"))
+   scale_colour_manual(labels = c("BCC-CSM2-MR", "CNRM-ESM2-1", "IPSL-CM6A-LR"), values=cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 combine_ratio_plot_dec19
 
-  #  ggsave('combine_ratio_plot_dec19.png', combine_ratio_plot_dec19, width = 12, height = 10, units = "in")
+   # ggsave('combine_ratio_plot_dec19_presentation.png', combine_ratio_plot_dec19, width = 16, height = 9, units = "in")
 
 ```
 
@@ -542,23 +543,24 @@ combine_ratio_plot_mar14 <- ggplot(data = futhis_ratio_combine_mar14, aes(x=ssp,
   geom_point(aes(color=model), size =6)+
   theme_minimal() +
   labs(x="Shared Socioeconomic Pathways (SSP)",
-       y="Future Projection/Historical Daily Total Average Ratio (Mar 14)",
-       caption = "CMIP6 Models: BCC-CSM2-MR, CNRM-ESM2-1, IPSL-CM6A-LR") +
+       y="Multiplicative Change Factor (MCF)") +
+  ggtitle("March 14th Wailupe Storm Event") +
     theme(text = element_text(size=22)) +
   scale_x_discrete(labels=c("ssp126_hist" = "SSP 1-2.6",
                             "ssp245_hist" = "SSP 2-4.5",
                               "ssp370_hist" = "SSP 3-7.0",
                             "ssp585_hist" = "SSP 5-8.5")) + 
  scale_y_continuous(breaks=(seq(0, 3.5, .5)), limits = c(0, 3.5))  +
-  theme(legend.title = element_blank())  +
+  guides(color=guide_legend("CMIP6 Model"))  +
     theme(legend.position="bottom") +
-   scale_colour_manual(values=cbp2) +
-  theme(text=element_text(color="black"),axis.text=element_text(color="black"))
+   scale_colour_manual(labels = c("BCC-CSM2-MR", "CNRM-ESM2-1", "IPSL-CM6A-LR"), values=cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 combine_ratio_plot_mar14
 
-   # ggsave('combine_ratio_plot_mar14.png', combine_ratio_plot_mar14, width = 12, height = 10, units = "in")
+     # ggsave('combine_ratio_plot_mar14_presentation.png', combine_ratio_plot_mar14, width = 16, height = 9, units = "in")
 
 ```
 
