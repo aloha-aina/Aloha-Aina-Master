@@ -672,4 +672,26 @@ ggplot() +
 
 
 ```
+## Climate change Multiplicative Factor (MCF) applied to March 14th, 2009 storm event (see climate_change_analysis_IPSL.Rmd in climate_change_data folder for final MCF values used)
+```{r}
+wailupe77_2009_03_14 <- wailupe_tidy_77 %>% 
+  filter(date == c("2009-03-14")) %>% 
+  select(station_name,date,time,qpcp) %>% 
+  mutate(qpcp_MCF_min = 0.4043945*qpcp,
+         qpcp_MCF_max =  2.1998642*qpcp) 
+
+wailupe77_2009_03_14$qpcp_MCF_min <- round(wailupe77_2009_03_14$qpcp_MCF_min  ,2)
+wailupe77_2009_03_14$qpcp_MCF_max <- round(wailupe77_2009_03_14$qpcp_MCF_max ,2)
+
+wailupe77_2010_12_19 <- wailupe_tidy_08 %>% 
+  filter(date == c("2010-12-19")) %>% 
+  select(station_name,date,time,qpcp) %>% 
+  mutate(qpcp_MCF_min = 0.1850539*qpcp,
+         qpcp_MCF_max =  3.0046226*qpcp) 
+
+wailupe77_2010_12_19$qpcp_MCF_min <- round(wailupe77_2010_12_19$qpcp_MCF_min  ,2)
+wailupe77_2010_12_19$qpcp_MCF_max <- round(wailupe77_2010_12_19$qpcp_MCF_max ,2)
+
+
+```
 
