@@ -87,9 +87,26 @@ calibrate_graph_min
 
 
 # save graphs
-ggsave('discharge_mar14_max_MCF.png', calibrate_graph_max, width = 16, height = 9, units = "in")
+ # ggsave('discharge_mar14_max_MCF.png', calibrate_graph_max, width = 16, height = 9, units = "in")
 
-ggsave('discharge_mar14_min_MCF.png', calibrate_graph_min, width = 16, height = 9, units = "in")
+# ggsave('discharge_mar14_min_MCF.png', calibrate_graph_min, width = 16, height = 9, units = "in")
 
 
+## combine all three lines onto one graph for easabilty 
+calibrate_graph <- ggplot()+
+  geom_line(data = discharge_MCF_min, aes(x=time_step, y=discharge_obs_cfs), color="#000000", size =2.5) +
+  geom_line(data= discharge_MCF_min, aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size =2.5)+
+  geom_line(data= discharge_MCF_max, aes(x=time_step, y=simulated_flow_cfs), color= "#D55E00", size = 2.5) +
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,850), breaks= seq(0,850, by= 100),expand= c(0,0))+
+  scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  annotate("text", label= "Observed", x=10.5, y=200, size=8)+
+  annotate("text", label= "Max MCF Simulated", x=10.5, y=655, size=8) +
+   annotate("text", label= "Min MCF Simulated", x=10.5, y=55, size=8) + 
+  theme(text = element_text(size=22)) 
+
+calibrate_graph
+
+ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
 ```
