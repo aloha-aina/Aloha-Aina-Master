@@ -1,0 +1,95 @@
+---
+title: "Graphs of Climate Change SWMM Results"
+author: "Elmera Azadpour"
+date: "1/24/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) #For data wrangling
+library(here)
+library(hydroGOF)
+```
+
+# Analysis of simulated vs observed runoff 
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
+#Graph observed vs simulated runoff for Max Multiplicative Change Factor (MCF)
+
+observed<- read.csv(here("climate_change_data","SWMM_results", "Mar14_observed.csv"))
+simulated_max_march14 <- read.csv(here("climate_change_data","SWMM_results", "MCF_max_Mar14_simulated.csv"))
+simulated_min_march14 <- read.csv(here("climate_change_data","SWMM_results", "MCF_min_Mar14_simulated.csv"))
+
+# merge MCF max with observed
+discharge_MCF_max<- merge(observed, simulated_max_march14, by = "time_step")
+
+#merge MCF min with observed
+discharge_MCF_min<- merge(observed, simulated_min_march14, by = "time_step")
+
+
+summary(discharge_MCF_max)
+
+# statical analyses
+# dischargettest<- t.test(discharge_MCF_max$discharge_obs_cfs, discharge_MCF_max$simulated_flow_cfs)
+# 
+# regress<- lm(discharge_obs_cfs ~ simulated_flow_cfs, data = discharge_MCF_max)
+# 
+# regress
+# 
+# sim<- discharge_MCF_max$simulated_flow_cfs
+# obs<- discharge_MCF_max$discharge_obs_cfs
+# 
+# 
+# sutcliffe<- NSE(sim, obs, na.rm=TRUE, FUN=NULL, epsilon=c("Pushpalatha2012"))
+# 
+# sutcliffe
+
+# write.csv(discharge,file = "discharge_obv_sim1.csv", row.names = FALSE)
+
+graph_max<- ggplot(discharge_MCF_max, aes(x=discharge_obs_cfs, simulated_flow_cfs))+
+  geom_point()
+
+graph_max
+
+graph_min<- ggplot(discharge_MCF_min, aes(x=discharge_obs_cfs, simulated_flow_cfs))+
+  geom_point()
+
+graph_min
+  
+calibrate_graph_max<- discharge_MCF_max %>% 
+  ggplot()+
+  geom_line(aes(x=time_step, y=discharge_obs_cfs), color="#000000", size = 2.5)+
+  geom_line(aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size = 2.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,850), breaks= seq(0,850, by= 100),expand= c(0,0))+
+  scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  annotate("text", label= "Observed", x=10.5, y=85, size=8)+
+  annotate("text", label= "Simulated", x=10.5, y=300, size=8) +
+  theme(text = element_text(size=22)) 
+
+calibrate_graph_max  
+
+calibrate_graph_min<- discharge_MCF_min %>% 
+  ggplot()+
+  geom_line(aes(x=time_step, y=discharge_obs_cfs), color="#000000", size =2.5) +
+  geom_line(aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size =2.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,400), breaks= seq(0,350, by= 50),expand= c(0,0))+
+  scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  annotate("text", label= "Simulated", x=10.5, y=45, size=8)+
+  annotate("text", label= "Observed", x=10.5, y=185, size=8) +
+    theme(text = element_text(size=22)) 
+ 
+
+calibrate_graph_min 
+
+
+# save graphs
+ggsave('discharge_mar14_max_MCF.png', calibrate_graph_max, width = 16, height = 9, units = "in")
+
+ggsave('discharge_mar14_min_MCF.png', calibrate_graph_min, width = 16, height = 9, units = "in")
+
+
+```
