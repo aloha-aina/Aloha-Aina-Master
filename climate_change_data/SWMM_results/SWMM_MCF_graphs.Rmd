@@ -110,3 +110,271 @@ calibrate_graph
 
 ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
 ```
+
+
+
+## Analysis of MCF max storm results
+```{r}
+subcatch_max_mcf<- read_csv("subcatchments_all.csv") %>% 
+  mutate(subcatchment= OBJECTID_1) %>% 
+  select(subcatchment, Curve_Number, Slope, percent_imp, Area_sqft)
+
+swm_results_max_mcf<-read_csv("Wailupe_MCF_Max_Mar14.csv") 
+
+#Characterize results by urbanization level
+results_max_mcf<- merge(subcatch_max_mcf, swm_results_max_mcf, by = "subcatchment") %>% 
+  mutate(runoff_normalized= 
+           total_runoff_in/Area_sqft) %>% 
+  mutate(Urbanization_level= 
+           case_when(
+             percent_imp <15 |percent_imp == 15 ~ "Natural (less than 15 % Impervious)",
+             percent_imp >15 & percent_imp <45 ~ "Urbanized (Between 15 and 45 % Impervious)",
+             percent_imp >44.9999 ~ "Very urbanized (More than 45 % Impervious)"
+             )
+           )
+
+write.csv(results_max_mcf, file = "results_max_mcf.csv") ##Export as .csv for use with graph maps
+
+
+#Perform a linear regression for the SWMM max MCF storm results
+results_max_mcf_regression<- lm(total_runoff_in ~Curve_Number + Slope + percent_imp + 
+                              Area_sqft, data = results_max_mcf)
+
+#Graph the relationship bw simulated runoff and impervious cover by urbanization level
+runoff_imp_graph_max_mcf<- results_max_mcf %>% 
+  ggplot(aes(x=percent_imp, y=total_runoff_in))+
+  geom_point(aes(color=Urbanization_level))+
+  labs(x= "Percent Impervious of Subcatchment", y= "Total Simulated Runoff (inches)")+
+  scale_y_continuous(limits= c(0,8), breaks= seq(0,8, by= 1),expand= c(0,0.08))+
+  scale_x_continuous(limits= c(0,80), breaks= seq(0,80, by= 10),expand= c(0,0))+
+  scale_color_manual(name= "Urbanization Level", values= c("darkgreen", "darkseagreen", 
+                                                           "darkgoldenrod1"))+
+  theme_classic()
+
+runoff_imp_graph_max_mcf
+
+#Save runoff vs. impervious graph
+# ggsave("runoff_imp_max_mcf.pdf", width = 8, height =4)
+# ggsave("runoff_imp_max_mcf.png", width = 8, height =4)
+
+#Create a table for the regression results
+# regress_table_max_mcf<- stargazer(results_max_mcf_regression, type ="html", digits= 2, 
+#                           dep.var.labels = "Total Runoff (Inches)", 
+#                        covariate.labels = c("Curve Number", "Slope", "Percent Impervious", 
+#                                             "Area (sqft)", "Y-Intercept"), 
+#                        omit.stat = c("rsq"))
+# regress_table_max_mcf
+
+```
+
+
+## Analysis of MCF min storm results
+```{r}
+subcatch_min_mcf<- read_csv("subcatchments_all.csv") %>% 
+  mutate(subcatchment= OBJECTID_1) %>% 
+  select(subcatchment, Curve_Number, Slope, percent_imp, Area_sqft)
+
+swm_results_min_mcf<-read_csv("Wailupe_MCF_Min_Mar14.csv") 
+
+#Characterize results by urbanization level
+results_min_mcf<- merge(subcatch_min_mcf, swm_results_min_mcf, by = "subcatchment") %>% 
+  mutate(runoff_normalized= 
+           total_runoff_in/Area_sqft) %>% 
+  mutate(Urbanization_level= 
+           case_when(
+             percent_imp <15 |percent_imp == 15 ~ "Natural (less than 15 % Impervious)",
+             percent_imp >15 & percent_imp <45 ~ "Urbanized (Between 15 and 45 % Impervious)",
+             percent_imp >44.9999 ~ "Very urbanized (More than 45 % Impervious)"
+             )
+           )
+
+write.csv(results_min_mcf, file = "results_min_mcf.csv") ##Export as .csv for use with graph maps
+
+
+#Perform a linear regression for the SWMM max MCF storm results
+results_min_mcf_regression<- lm(total_runoff_in ~Curve_Number + Slope + percent_imp + 
+                              Area_sqft, data = results_min_mcf)
+
+#Graph the relationship bw simulated runoff and impervious cover by urbanization level
+runoff_imp_graph_min_mcf<- results_min_mcf %>% 
+  ggplot(aes(x=percent_imp, y=total_runoff_in))+
+  geom_point(aes(color=Urbanization_level))+
+  labs(x= "Percent Impervious of Subcatchment", y= "Total Simulated Runoff (inches)")+
+  scale_y_continuous(limits= c(0,7), breaks= seq(0,7, by= 1),expand= c(0,0.08))+
+  scale_x_continuous(limits= c(0,80), breaks= seq(0,80, by= 10),expand= c(0,0))+
+  scale_color_manual(name= "Urbanization Level", values= c("darkgreen", "darkseagreen", 
+                                                           "darkgoldenrod1"))+
+  theme_classic()
+
+runoff_imp_graph_min_mcf
+
+#Save runoff vs. impervious graph
+ggsave("runoff_imp_min_mcf.pdf", width = 8, height =4)
+ggsave("runoff_imp_min_mcf.png", width = 8, height =4)
+
+#Create a table for the regression results
+regress_table_min_mcf<- stargazer(results_min_mcf_regression, type ="html", digits= 2, 
+                          dep.var.labels = "Total Runoff (Inches)", 
+                       covariate.labels = c("Curve Number", "Slope", "Percent Impervious", 
+                                            "Area (sqft)", "Y-Intercept"), 
+                       omit.stat = c("rsq"))
+regress_table_min_mcf
+```
+
+
+## Maps of SWMM Results
+### Code setup - Load packages
+```{r, warning = FALSE, message = FALSE}
+library(sf) #For shapefiles
+library(tmap) #For mapmaking
+library(tmaptools) #For mapmaking
+library(janitor) #For cleaning names
+```
+
+###  Maps for MCF max storm hotspots
+```{r, message=FALSE, warning = FALSE, message = FALSE}
+
+results_max_mcf<- read_csv("results_max_mcf.csv") ##read in file from code above
+
+#Combine subcatchments outline with wet storm results
+subcatch_max <- read_sf(dsn = here("climate_change_data", "SWMM_results","shapefiles"), layer = "subcatch_outline") %>%
+  st_transform(st_crs(4326)) %>% 
+  clean_names() %>% 
+  select(subcatchment = objectid_1) %>% 
+  merge(results_max_mcf) %>% 
+   filter(subcatchment != "5")
+
+#  Total volume hotspots  
+hotspots_max_mcf_total <- tm_basemap("OpenStreetMap.Mapnik") +
+  tm_shape(subcatch_max, unit = "Miles") +
+  tm_polygons("runoff_coeff", alpha = 0.8, palette = "Blues", style = "cont", n=8, 
+              legend.hist = TRUE, title = "Runoff Coefficient") +
+  tm_layout(title = "March 2009 Max MCF storm", inner.margins=c(.05, .05, 0.1, .53), 
+            legend.position =  c(.6,.32), legend.title.size = 1.4, legend.text.size = 1) +
+  tm_text("subcatchment", size = 0.3) +
+  tm_scale_bar(position = c(.6,.59), breaks = c(0, 0.2, 0.4, 0.6, 0.8,1)) +
+  tm_compass(position = c(.58,.52))
+
+# tmap_save(hotspots_max_mcf_total, here("climate_change_data", "output_maps","hotspots_mcf_max.png")) ##  not exporting
+
+
+#  Peak flow hotspots
+hotspots_max_mcf_peak <- tm_basemap("OpenStreetMap.Mapnik") +
+  tm_shape(subcatch_max, unit = "Miles") +
+  tm_polygons("peak_runoff_cfs", alpha = 0.75, palette = "Greens", style = "cont", n=8, 
+              legend.hist = TRUE, title = "Peak Discharge (cfs)") +
+  tm_layout(title = "March 2009 Max MCF storm", inner.margins=c(.05, .05, 0.1, .53), 
+            legend.position =  c(.6,.27), legend.title.size = 1.4, legend.text.size = 1) +
+  tm_text("subcatchment", size = 0.3) +
+  tm_scale_bar(position = c(.6,.54), breaks = c(0, 0.2, 0.4, 0.6, 0.8,1)) +
+  tm_compass(position = c(.58,.47))
+tmap_save(hotspots_max_mcf_peak, here("climate_change_data", "output_maps","hotspots_max_mcf_peak.png"))
+
+subcatch_max_peak <- subcatch_max %>%
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs)) +
+  theme_bw() + 
+  scale_fill_gradient(low = "light green", high = "dark green", name = "Peak Runoff (cfs)") +
+  labs(title = "Wailupe Max MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))
+
+subcatch_max_peak
+
+# ggsave('subcatch_max_peak.png', subcatch_max_peak, width = 5, height = 7, units = "in")
+
+subcatch_max_total <- subcatch_max %>%
+  ggplot() +
+  geom_sf(aes(fill = runoff_coeff)) +
+  theme_bw() + 
+  scale_fill_gradient(low = "#D6EAF8", high = "#2874A6", name = "Runoff Coefficient",
+                      breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)) +
+  labs(title = "Wailupe Max MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))
+
+subcatch_max_total
+
+ # ggsave('subcatch_max_total.png', subcatch_max_total, width = 5, height = 7, units = "in")
+
+
+```
+
+###  Maps for MCF min storm hotspots
+```{r, message=FALSE, warning = FALSE, message = FALSE}
+
+results_min_mcf<- read_csv("results_min_mcf.csv") ##read in file from code above
+
+#Combine subcatchments outline with wet storm results
+subcatch_min <- read_sf(dsn = here("climate_change_data", "SWMM_results","shapefiles"), layer = "subcatch_outline") %>%
+  st_transform(st_crs(4326)) %>% 
+  clean_names() %>% 
+  select(subcatchment = objectid_1) %>% 
+  merge(results_min_mcf) %>% 
+   filter(subcatchment != "5")
+
+#  Total volume hotspots  
+hotspots_min_mcf_total <- tm_basemap("OpenStreetMap.Mapnik") +
+  tm_shape(subcatch_min, unit = "Miles") +
+  tm_polygons("runoff_coeff", alpha = 0.8, palette = "Blues", style = "cont", n=8, 
+              legend.hist = TRUE, title = "Runoff Coefficient") +
+  tm_layout(title = "March 2009 Min MCF storm", inner.margins=c(.05, .05, 0.1, .53), 
+            legend.position =  c(.6,.32), legend.title.size = 1.4, legend.text.size = 1) +
+  tm_text("subcatchment", size = 0.3) +
+  tm_scale_bar(position = c(.6,.59), breaks = c(0, 0.2, 0.4, 0.6, 0.8,1)) +
+  tm_compass(position = c(.58,.52))
+##tmap_save(hotspots_wet_total, here("5.Results_Maps", "output_maps","hotspots_wet_total.png"))
+
+
+#  Peak flow hotspots
+hotspots_min_mcf_peak <- tm_basemap("OpenStreetMap.Mapnik") +
+  tm_shape(subcatch_min, unit = "Miles") +
+  tm_polygons("peak_runoff_cfs", alpha = 0.75, palette = "Greens", style = "cont", n=8, 
+              legend.hist = TRUE, title = "Peak Discharge (cfs)") +
+  tm_layout(title = "March 2009 Min MCF storm", inner.margins=c(.05, .05, 0.1, .53), 
+            legend.position =  c(.6,.27), legend.title.size = 1.4, legend.text.size = 1) +
+  tm_text("subcatchment", size = 0.3) +
+  tm_scale_bar(position = c(.6,.54), breaks = c(0, 0.2, 0.4, 0.6, 0.8,1)) +
+  tm_compass(position = c(.58,.47))
+##tmap_save(hotspots_wet_peak, here("5.Results_Maps", "output_maps","hotspots_wet_peak.png"))
+
+subcatch_min_peak <- subcatch_min %>%
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs)) +
+  theme_bw()+ 
+  scale_fill_gradient(low = "light green", high = "dark green", name = "Peak Runoff (cfs)") +
+  labs(title = "Wailupe Min MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))
+
+subcatch_min_peak
+
+# ggsave('subcatch_min_peak.png', subcatch_min_peak, width = 5, height = 7, units = "in")
+
+subcatch_min_total <- subcatch_min %>%
+  ggplot() +
+  geom_sf(aes(fill = runoff_coeff)) +
+  theme_bw() + 
+  scale_fill_gradient(low = "#D6EAF8", high = "#2874A6", name = "Runoff Coefficient",
+                      breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)) +
+  labs(title = "Wailupe Min MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))
+
+subcatch_min_total
+
+ ggsave('subcatch_min_total.png', subcatch_min_total, width = 5, height = 7, units = "in")
+
+```
