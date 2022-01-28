@@ -209,16 +209,16 @@ runoff_imp_graph_min_mcf<- results_min_mcf %>%
 runoff_imp_graph_min_mcf
 
 #Save runoff vs. impervious graph
-ggsave("runoff_imp_min_mcf.pdf", width = 8, height =4)
-ggsave("runoff_imp_min_mcf.png", width = 8, height =4)
+# ggsave("runoff_imp_min_mcf.pdf", width = 8, height =4)
+# ggsave("runoff_imp_min_mcf.png", width = 8, height =4)
 
 #Create a table for the regression results
-regress_table_min_mcf<- stargazer(results_min_mcf_regression, type ="html", digits= 2, 
-                          dep.var.labels = "Total Runoff (Inches)", 
-                       covariate.labels = c("Curve Number", "Slope", "Percent Impervious", 
-                                            "Area (sqft)", "Y-Intercept"), 
-                       omit.stat = c("rsq"))
-regress_table_min_mcf
+# regress_table_min_mcf<- stargazer(results_min_mcf_regression, type ="html", digits= 2, 
+#                           dep.var.labels = "Total Runoff (Inches)", 
+#                        covariate.labels = c("Curve Number", "Slope", "Percent Impervious", 
+#                                             "Area (sqft)", "Y-Intercept"), 
+#                        omit.stat = c("rsq"))
+# regress_table_min_mcf
 ```
 
 
@@ -268,13 +268,14 @@ hotspots_max_mcf_peak <- tm_basemap("OpenStreetMap.Mapnik") +
   tm_text("subcatchment", size = 0.3) +
   tm_scale_bar(position = c(.6,.54), breaks = c(0, 0.2, 0.4, 0.6, 0.8,1)) +
   tm_compass(position = c(.58,.47))
-tmap_save(hotspots_max_mcf_peak, here("climate_change_data", "output_maps","hotspots_max_mcf_peak.png"))
+#tmap_save(hotspots_max_mcf_peak, here("climate_change_data", "output_maps","hotspots_max_mcf_peak.png"))
 
 subcatch_max_peak <- subcatch_max %>%
   ggplot() +
   geom_sf(aes(fill = peak_runoff_cfs)) +
   theme_bw() + 
-  scale_fill_gradient(low = "light green", high = "dark green", name = "Peak Runoff (cfs)") +
+  scale_fill_gradient(low = "#D1F2EB", high = "#148F77", name = "Peak Runoff (cfs)",
+                      breaks = c(0, 50, 100, 150, 200,250, 300, 350)) +
   labs(title = "Wailupe Max MCF") +
   geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
@@ -291,7 +292,8 @@ subcatch_max_total <- subcatch_max %>%
   geom_sf(aes(fill = runoff_coeff)) +
   theme_bw() + 
   scale_fill_gradient(low = "#D6EAF8", high = "#2874A6", name = "Runoff Coefficient",
-                      breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)) +
+                      breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                      limits = c(0,1.0)) +
   labs(title = "Wailupe Max MCF") +
   geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
@@ -348,7 +350,8 @@ subcatch_min_peak <- subcatch_min %>%
   ggplot() +
   geom_sf(aes(fill = peak_runoff_cfs)) +
   theme_bw()+ 
-  scale_fill_gradient(low = "light green", high = "dark green", name = "Peak Runoff (cfs)") +
+  scale_fill_gradient(low = "#D1F2EB", high = "#148F77", name = "Peak Runoff (cfs)",
+                      breaks = c(0, 3, 6, 9, 12, 15)) +
   labs(title = "Wailupe Min MCF") +
   geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
@@ -365,7 +368,8 @@ subcatch_min_total <- subcatch_min %>%
   geom_sf(aes(fill = runoff_coeff)) +
   theme_bw() + 
   scale_fill_gradient(low = "#D6EAF8", high = "#2874A6", name = "Runoff Coefficient",
-                      breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)) +
+                      breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0),
+                      limits = c(0,1.0)) +
   labs(title = "Wailupe Min MCF") +
   geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
@@ -375,6 +379,6 @@ theme(axis.text.x = element_text(angle = 90))
 
 subcatch_min_total
 
- ggsave('subcatch_min_total.png', subcatch_min_total, width = 5, height = 7, units = "in")
+ # ggsave('subcatch_min_total.png', subcatch_min_total, width = 5, height = 7, units = "in")
 
 ```
