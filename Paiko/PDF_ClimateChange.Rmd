@@ -77,7 +77,7 @@ cbp2 <- c("#000000", "#009E73",
            "#D55E00")
 
 
-ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Distribution)) +
+pdf_plot <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Distribution)) +
   geom_line(size=1.5) +
   theme_minimal() +
   labs(x= "Daily Precipitation (in)") +
@@ -85,7 +85,13 @@ ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Distribution)) +
                 color = "#D55E00", size=1.5) +
   geom_vline(xintercept = 0.14, linetype="solid", 
                 color = "#009E73", size=1.5) +
-  annotate("text", x = 4.75, y = 0.94, label = "Max MCF * avg pcp", color = "#D55E00") +
-  annotate("text", x = 4.75, y = 0.91, label = "Min MCF * avg pcp", color = "#009E73") 
+  annotate("text", x = 4.75, y = 0.94, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
+  annotate("text", x = 4.75, y = 0.91, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
+    theme(text = element_text(size=22)) 
+
+pdf_plot
+
+# ggsave('pdf_MCF.png', pdf_plot, width = 16, height = 9, units = "in")
+
 ```
 
