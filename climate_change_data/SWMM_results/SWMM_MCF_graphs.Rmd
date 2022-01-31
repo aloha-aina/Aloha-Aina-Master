@@ -270,12 +270,13 @@ hotspots_max_mcf_peak <- tm_basemap("OpenStreetMap.Mapnik") +
   tm_compass(position = c(.58,.47))
 #tmap_save(hotspots_max_mcf_peak, here("climate_change_data", "output_maps","hotspots_max_mcf_peak.png"))
 
-subcatch_max_peak <- subcatch_max %>%
+subcatch_max_peak <- subcatch_max %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
   ggplot() +
   geom_sf(aes(fill = peak_runoff_cfs)) +
   theme_bw() + 
   scale_fill_gradient(low = "#D1F2EB", high = "#148F77", name = "Peak Runoff (cfs)",
-                      breaks = c(0, 50, 100, 150, 200,250, 300, 350)) +
+                      breaks = c(0, 25, 50, 75, 100 )) +
   labs(title = "Wailupe Max MCF") +
   geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
@@ -285,7 +286,7 @@ theme(axis.text.x = element_text(angle = 90))
 
 subcatch_max_peak
 
-# ggsave('subcatch_max_peak.png', subcatch_max_peak, width = 5, height = 7, units = "in")
+# ggsave('subcatch_max_peak_removedsubs.png', subcatch_max_peak, width = 5, height = 7, units = "in")
 
 subcatch_max_total <- subcatch_max %>%
   ggplot() +
@@ -347,6 +348,7 @@ hotspots_min_mcf_peak <- tm_basemap("OpenStreetMap.Mapnik") +
 ##tmap_save(hotspots_wet_peak, here("5.Results_Maps", "output_maps","hotspots_wet_peak.png"))
 
 subcatch_min_peak <- subcatch_min %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24))  %>% 
   ggplot() +
   geom_sf(aes(fill = peak_runoff_cfs)) +
   theme_bw()+ 
@@ -361,7 +363,7 @@ theme(axis.text.x = element_text(angle = 90))
 
 subcatch_min_peak
 
-# ggsave('subcatch_min_peak.png', subcatch_min_peak, width = 5, height = 7, units = "in")
+# ggsave('subcatch_min_peak_removedsub.png', subcatch_min_peak, width = 5, height = 7, units = "in")
 
 subcatch_min_total <- subcatch_min %>%
   ggplot() +
@@ -382,3 +384,5 @@ subcatch_min_total
  # ggsave('subcatch_min_total.png', subcatch_min_total, width = 5, height = 7, units = "in")
 
 ```
+
+

@@ -1,0 +1,91 @@
+---
+title: "Probabilty Distribution Function: Climate Change Analysis"
+author: "Elmera Azadpour"
+date: "1/30/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(lubridate)
+library(tidyverse)
+library(ggpubr)
+library(here)
+library(RColorBrewer)
+```
+
+```{r}
+## read in wailupe precip data from NOAA
+wailupe_77_rain <- read.csv(here("Paiko","NOAA_WailupeHawaiiKai_77.csv"))
+
+##Use lubridate to clean up the dates and times
+wailupe_77_rain$DATE <- ymd(wailupe_77_rain$DATE)
+
+```
+
+```{r}
+## for wailupe 1977-2014
+wailupe_tidy_77 <- wailupe_77_rain %>% 
+  rename(station = STATION, station_name = STATION_NAME, elevation = ELEVATION, 
+         lat = LATITUDE, lon = LONGITUDE, date = DATE, time = TIME, qgag = QGAG, 
+         qgag_flag = Measurement.Flag, qgag_qual = Quality.Flag, qgag_units = Units, 
+         qpcp = QPCP, qpcp_flag = Measurement.Flag.1, qpcp_qual = Quality.Flag.1, 
+         qpcp_units = Units.1) %>% #renames columns
+  filter(station_name == "WAILUPE VALLEY SCHOOL 723.6 HI US") %>% #filter to Wailupe gauge only
+  filter(qpcp != "-9999",
+         qpcp != "999",
+         qpcp != "999.99",
+         qpcp_flag != "g",
+         qpcp_flag != "{",
+         qpcp_flag != "}",
+         qpcp_flag != "[",
+         qpcp_flag != "]",
+         qgag != "-9999.00",
+         qgag != "-9999",
+         qgag_flag != "g",
+         qgag_flag != "V",
+         qgag_flag != "P",
+         qgag_flag != "{",
+         qgag_flag != "}",
+         qgag_flag != "[",
+         qgag_flag != "]") ## removes all flagged data
+
+
+## daily total precip
+wailupe_daily_77 <- wailupe_tidy_77 %>%  
+  group_by(date) %>%
+  summarize(
+    daily_pcp = sum(qpcp),
+    daily_vol = sum(qgag)) ## gives total summed precip data per day. HT is given in inches.
+
+wailupe_daily_77$date <- ymd(wailupe_daily_77$date)
+```
+
+
+## PDF code: https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html
+```{r}
+
+z=wailupe_daily_77$daily_pcp
+
+  dStandardNormal <- data.frame(daily_pcp=z,
+                               Density=dnorm(z, mean=0, sd=1),
+                               Distribution=pnorm(z, mean=0, sd=1))  
+
+  # qStandardNormal <- data.frame(Q=q, 
+  #                               Quantile=qnorm(q, mean=0, sd=1))  
+
+cbp2 <- c("#000000", "#009E73",
+           "#D55E00")
+
+
+ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Distribution)) +
+  geom_line(size=1.5) +
+  theme_minimal() +
+  labs(x= "Daily Precipitation (in)") +
+  geom_vline(xintercept = 0.77, linetype="solid", 
+                color = "#D55E00", size=1.5) +
+  geom_vline(xintercept = 0.14, linetype="solid", 
+                color = "#009E73", size=1.5) +
+  annotate("text", x = 4.75, y = 0.94, label = "Max MCF * avg pcp", color = "#D55E00") +
+  annotate("text", x = 4.75, y = 0.91, label = "Min MCF * avg pcp", color = "#009E73") 
+```
+
