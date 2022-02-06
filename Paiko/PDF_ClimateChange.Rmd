@@ -66,32 +66,37 @@ wailupe_daily_77$date <- ymd(wailupe_daily_77$date)
 
 z=wailupe_daily_77$daily_pcp
 
-  dStandardNormal <- data.frame(daily_pcp=z,
-                               Density=dnorm(z, mean=0, sd=1),
-                               Distribution=pnorm(z, mean=0, sd=1))  
-
-  # qStandardNormal <- data.frame(Q=q, 
-  #                               Quantile=qnorm(q, mean=0, sd=1))  
+dStandardNormal <- data.frame(daily_pcp=z,
+                               Density=dnorm(z, mean=0.3498252, sd=0.5167536),
+                               Distribution=pnorm(z, mean=0.3498252, sd=0.5167536),
+                              Quantile = qnorm(z, mean=0.3498252, sd=0.5167536))  
+  
+# 
+#   qStandardNormal <- data.frame(daily_pcp=z,
+#                                 Quantile=qnorm(z, mean=0, sd=1))
+  
+# ggplot(data=qStandardNormal, aes(x=daily_pcp, y= Quantile)) +
+#   geom_line(size=1.5)
 
 cbp2 <- c("#000000", "#009E73",
            "#D55E00")
 
 
-pdf_plot <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Distribution)) +
+pdf_plot_density <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
   geom_line(size=1.5) +
-  theme_minimal() +
+  theme_classic() +
   labs(x= "Daily Precipitation (in)") +
   geom_vline(xintercept = 0.77, linetype="solid", 
                 color = "#D55E00", size=1.5) +
   geom_vline(xintercept = 0.14, linetype="solid", 
                 color = "#009E73", size=1.5) +
-  annotate("text", x = 4.75, y = 0.94, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
-  annotate("text", x = 4.75, y = 0.91, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
+  annotate("text", x = 4.75, y = 0.75, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
+  annotate("text", x = 4.75, y = 0.70, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
     theme(text = element_text(size=22)) 
 
-pdf_plot
+pdf_plot_density
 
-# ggsave('pdf_MCF.png', pdf_plot, width = 16, height = 9, units = "in")
+# ggsave('pdf_MCF.png', pdf_plot_density, width = 16, height = 9, units = "in")
 
 ```
 

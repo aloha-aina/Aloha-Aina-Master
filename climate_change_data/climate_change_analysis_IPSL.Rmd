@@ -541,7 +541,7 @@ cbp2 <- c("#000000", "#009E73",
 
 combine_ratio_plot_mar14 <- ggplot(data = futhis_ratio_combine_mar14, aes(x=ssp, y=fut_hist_ratio)) +
   geom_point(aes(color=model), size =6)+
-  theme_minimal() +
+  theme_classic() +
   labs(x="Shared Socioeconomic Pathways (SSP)",
        y="Multiplicative Change Factor (MCF)") +
   ggtitle("March 14th Wailupe Storm Event") +
