@@ -12,6 +12,7 @@ library(here)
 library(hydroGOF)
 library(stargazer)
 library(kableExtra)
+options(scipen=999)
 ```
 
 # Analysis of simulated vs observed runoff 
@@ -137,8 +138,13 @@ results_max_mcf<- merge(subcatch_max_mcf, swm_results_max_mcf, by = "subcatchmen
 
 write.csv(results_max_mcf, file = "results_max_mcf.csv") ##Export as .csv for use with graph maps
 
+## normalize peak discharge (cfs) for max MCF by dividing by subcatchment area 
+results_max_mcf_normalized <- results_max_mcf %>% 
+  mutate(peak_runoff_cfs_norm = peak_runoff_cfs/Area_sqft)
+
 results_maxmcf_peakflow_table <- results_max_mcf %>% 
   select(subcatchment, peak_runoff_cfs, Curve_Number, Slope, percent_imp, Area_sqft) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
   arrange(desc(peak_runoff_cfs)) %>% 
   top_n(20,peak_runoff_cfs) %>% 
   kable(col.names=c("Subcatchment","Peak Runoff (cfs), Max MCF", 
@@ -148,8 +154,21 @@ results_maxmcf_peakflow_table <- results_max_mcf %>%
 
 results_maxmcf_peakflow_table
 
+results_maxmcf_peakflow_table_normalized <- results_max_mcf_normalized %>% 
+  select(subcatchment, peak_runoff_cfs, Curve_Number, Slope, percent_imp, Area_sqft,peak_runoff_cfs_norm ) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
+  arrange(desc(peak_runoff_cfs_norm)) %>% 
+  top_n(20,peak_runoff_cfs_norm) %>% 
+  kable(col.names=c("Subcatchment","Peak Runoff (cfs), Max MCF", 
+                                "Curve Number", "Slope", 
+                                "Percent Impervious", "Area (sqft)", "Normalized Peak Runoff (cfs/sqft)")) %>% 
+  kable_styling(bootstrap_options = "striped")
+
+results_maxmcf_peakflow_table_normalized
+
 results_maxmcf_runoffcoef_table <- results_max_mcf %>% 
   select(subcatchment, runoff_coeff, Curve_Number, Slope, percent_imp, Area_sqft) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
   arrange(desc(runoff_coeff)) %>% 
   top_n(20,runoff_coeff) %>% 
   kable(col.names=c("Subcatchment","Runoff Coefficient, Max MCF", 
@@ -213,8 +232,14 @@ results_min_mcf<- merge(subcatch_min_mcf, swm_results_min_mcf, by = "subcatchmen
 
 write.csv(results_min_mcf, file = "results_min_mcf.csv") ##Export as .csv for use with graph maps
 
+
+## normalize peak discharge (cfs) for min MCF by dividing by subcatchment area 
+results_min_mcf_normalized <- results_min_mcf %>% 
+  mutate(peak_runoff_cfs_norm = peak_runoff_cfs/Area_sqft)
+
 results_minmcf_peakflow_table <- results_min_mcf %>% 
   select(subcatchment, peak_runoff_cfs, Curve_Number, Slope, percent_imp, Area_sqft) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
   arrange(desc(peak_runoff_cfs)) %>% 
   top_n(20,peak_runoff_cfs) %>% 
   kable(col.names=c("Subcatchment","Peak Runoff (cfs), Min MCF", 
@@ -224,8 +249,21 @@ results_minmcf_peakflow_table <- results_min_mcf %>%
 
 results_minmcf_peakflow_table
 
+results_minmcf_peakflow_normalized_table <- results_min_mcf_normalized %>% 
+  select(subcatchment, peak_runoff_cfs, Curve_Number, Slope, percent_imp, Area_sqft,peak_runoff_cfs_norm ) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
+  arrange(desc(peak_runoff_cfs_norm)) %>% 
+  top_n(20,peak_runoff_cfs_norm) %>% 
+  kable(col.names=c("Subcatchment","Peak Runoff (cfs), Min MCF", 
+                                "Curve Number", "Slope", 
+                                "Percent Impervious", "Area (sqft)", "Normalized Peak Runoff (cfs/sqft)")) %>% 
+  kable_styling(bootstrap_options = "striped")
+
+results_minmcf_peakflow_normalized_table
+
 results_minmcf_runoffcoef_table <- results_min_mcf %>% 
   select(subcatchment, runoff_coeff, Curve_Number, Slope, percent_imp, Area_sqft) %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
   arrange(desc(runoff_coeff)) %>% 
   top_n(20,runoff_coeff) %>% 
   kable(col.names=c("Subcatchment","Runoff Coefficient, Min MCF", 
@@ -456,4 +494,209 @@ subcatch_min_total
 
 ```
 
+
+## Normalized Peak Discharge Maps 
+```{r}
+subcatch_max_normalized <- read_sf(dsn = here("climate_change_data", "SWMM_results","shapefiles"), layer = "subcatch_outline") %>%
+  st_transform(st_crs(4326)) %>% 
+  clean_names() %>% 
+  select(subcatchment = objectid_1) %>% 
+  merge(results_max_mcf_normalized) %>% 
+   filter(subcatchment != "5")
+
+## normalized Max MCF Peak Discharge
+subcatch_max_peak_normalized <- subcatch_max_normalized %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs_norm)) +
+  theme_bw() + 
+  scale_fill_gradient(low = "#D1F2EB", high = "#148F77", name = "Normalized Peak Discharge (cfs/sqft)") +
+  labs(title = "Max MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))+ 
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void() # for faculty presentation, remove lines and axis elements 
+
+subcatch_max_peak_normalized
+
+# ggsave('subcatch_max_peak_removedsubs_themevoid_norm.png', subcatch_max_peak_normalized, width = 5, height = 7, units = "in")
+
+subcatch_min_normalized <- read_sf(dsn = here("climate_change_data", "SWMM_results","shapefiles"), layer = "subcatch_outline") %>%
+  st_transform(st_crs(4326)) %>% 
+  clean_names() %>% 
+  select(subcatchment = objectid_1) %>% 
+  merge(results_min_mcf_normalized) %>% 
+   filter(subcatchment != "5")
+
+## normalized Min MCF Peak Discharge
+subcatch_min_peak_normalized <- subcatch_min_normalized %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24))  %>% 
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs_norm)) +
+  theme_classic()+ 
+  scale_fill_gradient(low = "#D1F2EB", high = "#148F77", name = "Normalized Peak Discharge (cfs/sqft)") +
+  labs(title = "Min MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90)) + 
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void() # for facily presentation, remove lines and axis elements 
+
+subcatch_min_peak_normalized
+
+ # ggsave('subcatch_min_peak_removedsub_themevoid_norm.png', subcatch_min_peak_normalized, width = 5, height = 7, units = "in")
+```
+## binned runoff coefficient maps for min and max MCF 
+```{r}
+library(RColorBrewer)
+library(metR)
+
+
+# View a single RColorBrewer palette by specifying its name
+display.brewer.pal(n = 7, name = 'Blues')
+# Hexadecimal color specification
+brewer.pal(n = 7, name = "Blues")
+
+
+mycols <- brewer.pal(n = 11, name = "Blues")
+mybreaks_max<- c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+
+subcatch_min_total <- subcatch_min %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  mutate(runoff_coeff_cut = cut_number(runoff_coeff, n = 10)) %>%
+  ggplot() +
+  geom_sf(aes(fill = runoff_coeff_cut)) +
+  theme_bw()  +
+  scale_fill_gradientn(colours = mycols,
+                       breaks= mybreaks_max,
+    super = metR::ScaleDiscretised,
+    name = "Runoff Coefficient") +
+  theme(legend.position = "bottom") +
+  labs(title = "Min MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void()
+
+subcatch_min_total
+
+ # ggsave('subcatch_min_total_binned.png', subcatch_min_total, width = 5, height = 7, units = "in")
+
+
+
+mycols <- brewer.pal(n = 11, name = "Blues")
+mybreaks_max<- c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+
+subcatch_max_total <- subcatch_max %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  mutate(runoff_coeff_cut = cut_number(runoff_coeff, n = 10)) %>%
+  ggplot() +
+  geom_sf(aes(fill = runoff_coeff_cut)) +
+  theme_bw()  +
+  scale_fill_gradientn(colours = mycols,
+                       breaks= mybreaks_max,
+    super = metR::ScaleDiscretised,
+    name = "Runoff Coefficient") +
+  labs(title = "Max MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void()
+
+subcatch_max_total
+
+ # ggsave('subcatch_max_total_binned.png', subcatch_max_total, width = 5, height = 7, units = "in")
+
+```
+
+```{r}
+
+mycols2 <- brewer.pal(n = 11, name = "Greens")
+mybreaks2_min<- c(0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0)
+
+subcatch_min_peak <- subcatch_min %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24))  %>%
+  mutate(peak_runoff_cfs_cut = cut_number(peak_runoff_cfs, n = 11)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs_cut)) +
+  theme_classic()+
+  scale_fill_gradientn(colours = mycols2,
+                       breaks= mybreaks2_min,
+    super = metR::ScaleDiscretised,
+    name = "Peak Discharge (cfs)") +
+  labs(title = "Min MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90)) + 
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void() # for facily presentation, remove lines and axis elements 
+
+subcatch_min_peak
+
+ # ggsave('subcatch_min_peak_removedsub_themevoid_binned.png', subcatch_min_peak, width = 5, height = 7, units = "in")
+
+mycols3 <- brewer.pal(n = 11, name = "Greens")
+mybreaks3_max<- c(0.0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+
+subcatch_max_peak <- subcatch_max %>% 
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  mutate(peak_runoff_cfs_cut = cut_number(peak_runoff_cfs, n = 11)) %>% 
+  ggplot() +
+  geom_sf(aes(fill = peak_runoff_cfs_cut)) +
+  theme_classic()+
+  scale_fill_gradientn(colours = mycols3,
+                       breaks= mybreaks3_max,
+    super = metR::ScaleDiscretised,
+    name = "Peak Discharge (cfs)") +
+  labs(title = "Max MCF") +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  # geom_sf_label(aes(label = subcatchment), size = 1.5) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+theme(axis.text.x = element_text(angle = 90))+ 
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.border=element_blank()) +
+  theme_void() # for faculty presentation, remove lines and axis elements 
+
+subcatch_max_peak
+
+# ggsave('subcatch_max_peak_removedsubs_themevoid_binned.png', subcatch_max_peak, width = 5, height = 7, units = "in")
+
+```
 

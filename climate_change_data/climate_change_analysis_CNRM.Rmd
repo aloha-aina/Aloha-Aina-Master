@@ -18,15 +18,15 @@ library(zoo)
 ```{r}
 ## Note: these data are from climate model CNRM-ESM2-1 (France)
 ## daily avgs
-historical = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_historical_1850_2014_avg.csv")) %>%  
+historical_avg = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_historical_1850_2014_avg.csv")) %>%  
   rename(date = dayofyear, pcp = pr) 
-ssp126 = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_ssp126_2015_2100_avg.csv")) %>% 
+ssp126_avg = read.csv(here("climate_change_data", "CNRM_daily_avg","oahu_ssp126_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp245 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp245_2015_2100_avg.csv")) %>% 
+ssp245_avg = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp245_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr) 
-ssp370 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp370_2015_2100_avg.csv")) %>% 
+ssp370_avg = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp370_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
-ssp585 = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp585_2015_2100_avg.csv")) %>% 
+ssp585_avg = read.csv(here("climate_change_data","CNRM_daily_avg","oahu_ssp585_2015_2100_avg.csv")) %>% 
   rename(date = dayofyear, pcp = pr)
 
 ## daily totals
@@ -42,11 +42,11 @@ ssp585_tot = read.csv(here("climate_change_data","CNRM_daily_tot","oahu_ssp585_2
   rename(date = dayofyear, pcp = pr)
 
 ## convert date column to year, month, day components using luberdate package
-historical$date <- ymd(historical$date)
-ssp126$date <- ymd(ssp126$date)
-ssp245$date <- ymd(ssp245$date)
-ssp370$date <- ymd(ssp370$date)
-ssp585$date <- ymd(ssp585$date)
+historical_avg$date <- ymd(historical_avg$date)
+ssp126_avg$date <- ymd(ssp126_avg$date)
+ssp245_avg$date <- ymd(ssp245_avg$date)
+ssp370_avg$date <- ymd(ssp370_avg$date)
+ssp585_avg$date <- ymd(ssp585_avg$date)
 
 historical_tot$date <- ymd(historical_tot$date)
 ssp126_tot$date <- ymd(ssp126_tot$date)
@@ -55,14 +55,14 @@ ssp370_tot$date <- ymd(ssp370_tot$date)
 ssp585_tot$date <- ymd(ssp585_tot$date)
 ```
 
-## explore daily avg pcp data from jupyter notebook 
+## explore daily avg pcp data frame exported from python
 ```{r}
 daily_avg_proj <- 
   ggplot() +
-  geom_line(data = ssp126, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
-  geom_line(data = ssp245, aes(x=date, y=pcp, color="red"), size = 0.5) +
-  geom_line(data = ssp370, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
-  geom_line(data = ssp585, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  geom_line(data = ssp126_avg, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = ssp245_avg, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = ssp370_avg, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = ssp585_avg, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,7,1)) +
   scale_x_date(date_breaks = "10 years", date_labels = "%Y") +
@@ -73,147 +73,140 @@ daily_avg_proj <-
 
 daily_avg_proj
 
-## extra bit for regression 
-# +
-#   geom_smooth(method='lm', formula = y~x) +
-#   stat_regline_equation(label.x = 2015,
-#                         label.y = 6) +
-#   stat_cor(label.x = 10,
-#            label.y = 4)
 ```
 
-## wrangling bits to group_by()
+## wrangle data to have seperate yr, month, day columns
 ```{r}
-# add seperate columns for year, month and day
-historical <- historical %>% 
+# add seperate columns for year, month and day for avg daily data 
+historical_avg <- historical_avg %>% 
   mutate(year = year(date)) %>% 
   mutate(month = month(date)) %>% 
   mutate(day = day(date))
 
-ssp126 <- ssp126 %>% 
+ssp126_avg <- ssp126_avg %>% 
   mutate(year = year(date)) %>% 
   mutate(month = month(date)) %>% 
   mutate(day = day(date))
 
-ssp245 <- ssp245 %>% 
+ssp245_avg <- ssp245_avg %>% 
   mutate(year = year(date)) %>% 
   mutate(month = month(date)) %>% 
   mutate(day = day(date))
 
-ssp370 <- ssp370 %>% 
+ssp370_avg <- ssp370_avg %>% 
   mutate(year = year(date)) %>% 
   mutate(month = month(date)) %>% 
   mutate(day = day(date))
 
-ssp585 <- ssp585  %>% 
+ssp585_avg <- ssp585_avg  %>% 
   mutate(year = year(date)) %>% 
   mutate(month = month(date)) %>% 
   mutate(day = day(date))
 
 
 # group by yearly sum of pcp 
-historical_yearly <- historical %>% 
+historical_yearly_avg <- historical_avg %>% 
   group_by(year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(year, sum) %>% 
   distinct()
 
-historical_yearly$year <- as.numeric(historical_yearly$year) 
+historical_yearly_avg$year <- as.numeric(historical_yearly_avg$year) 
 
 
 # group by yearly sum of pcp 
-ssp126_yearly <- ssp126 %>% 
+ssp126_yearly_avg <- ssp126_avg %>% 
   group_by(year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(year, sum) %>% 
   distinct()
 
-ssp126_yearly$year <- as.numeric(ssp126_yearly$year) 
+ssp126_yearly_avg$year <- as.numeric(ssp126_yearly_avg$year) 
 
 # group by yearly sum of pcp 
-ssp245_yearly <- ssp245 %>% 
+ssp245_yearly_avg <- ssp245_avg %>% 
   group_by(year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(year, sum) %>% 
   distinct()
 
-ssp245_yearly$year <- as.numeric(ssp245_yearly$year) 
+ssp245_yearly_avg$year <- as.numeric(ssp245_yearly_avg$year) 
 
 # group by yearly sum of pcp 
-ssp370_yearly <- ssp370 %>% 
+ssp370_yearly_avg <- ssp370_avg %>% 
   group_by(year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(year, sum) %>% 
   distinct()
 
-ssp370_yearly$year <- as.numeric(ssp370_yearly$year) 
+ssp370_yearly_avg$year <- as.numeric(ssp370_yearly_avg$year) 
 
 # group by yearly sum of pcp 
-ssp585_yearly <- ssp585 %>% 
+ssp585_yearly_avg <- ssp585_avg %>% 
   group_by(year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(year, sum) %>% 
   distinct()
 
-ssp585_yearly$year <- as.numeric(ssp585_yearly$year) 
+ssp585_yearly_avg$year <- as.numeric(ssp585_yearly_avg$year) 
 
 
 # group by month (and associated year) sum of pcp
-historical_monthly <- historical %>% 
+historical_monthly_avg <- historical_avg %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
   distinct()
 
-historical_monthly$date <- format(as.Date(paste(historical_monthly$year, historical_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+historical_monthly_avg$date <- format(as.Date(paste(historical_monthly_avg$year, historical_monthly_avg$month, 01), "%Y %m %d"), "%m-%Y")
 
-historical_monthly$date <- my(historical_monthly$date)
+historical_monthly_avg$date <- my(historical_monthly_avg$date)
 
 
 # group by month (and associated year) sum of pcp
-ssp126_monthly <- ssp126 %>% 
+ssp126_monthly_avg <- ssp126_avg %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
   distinct()
 
-ssp126_monthly$date <- format(as.Date(paste(ssp126_monthly$year, ssp126_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+ssp126_monthly_avg$date <- format(as.Date(paste(ssp126_monthly_avg$year, ssp126_monthly_avg$month, 01), "%Y %m %d"), "%m-%Y")
 
-ssp126_monthly$date <- my(ssp126_monthly$date)
+ssp126_monthly_avg$date <- my(ssp126_monthly_avg$date)
 
 
 # group by month (and associated year) sum of pcp
-ssp245_monthly <- ssp245 %>% 
+ssp245_monthly_avg <- ssp245_avg %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
   distinct()
 
-ssp245_monthly$date <- format(as.Date(paste(ssp245_monthly$year, ssp245_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+ssp245_monthly_avg$date <- format(as.Date(paste(ssp245_monthly_avg$year, ssp245_monthly_avg$month, 01), "%Y %m %d"), "%m-%Y")
 
-ssp245_monthly$date <- my(ssp245_monthly$date)
+ssp245_monthly_avg$date <- my(ssp245_monthly_avg$date)
 
 # group by yearly sum of daily avg pcp 
-ssp370_monthly <- ssp370 %>% 
+ssp370_monthly_avg <- ssp370_avg %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
   distinct() 
   
-ssp370_monthly$date <- format(as.Date(paste(ssp370_monthly$year, ssp370_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+ssp370_monthly_avg$date <- format(as.Date(paste(ssp370_monthly_avg$year, ssp370_monthly_avg$month, 01), "%Y %m %d"), "%m-%Y")
 
-ssp370_monthly$date <- my(ssp370_monthly$date)
+ssp370_monthly_avg$date <- my(ssp370_monthly_avg$date)
 
 # group by yearly sum of daily avg pcp 
-ssp585_monthly <- ssp585 %>% 
+ssp585_monthly_avg <- ssp585_avg %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
   distinct() 
   
-ssp585_monthly$date <- format(as.Date(paste(ssp585_monthly$year, ssp585_monthly$month, 01), "%Y %m %d"), "%m-%Y")
+ssp585_monthly_avg$date <- format(as.Date(paste(ssp585_monthly_avg$year, ssp585_monthly_avg$month, 01), "%Y %m %d"), "%m-%Y")
 
-ssp585_monthly$date <- my(ssp585_monthly$date)
+ssp585_monthly_avg$date <- my(ssp585_monthly_avg$date)
 
 ```
 
@@ -223,10 +216,10 @@ ssp585_monthly$date <- my(ssp585_monthly$date)
 ## all three ssps 
 yearly_avg_proj <- 
   ggplot() +
-  geom_line(data = ssp126_yearly, aes(x=year, y=sum, color="orange"), size = 0.5) + 
-  geom_line(data = ssp245_yearly, aes(x=year, y=sum, color="red"), size = 0.5) +
-  geom_line(data = ssp370_yearly, aes(x=year, y=sum, color = "blue"), size = 0.5) +
-  geom_line(data = ssp585_yearly, aes(x=year, y=sum, color = "seagreen"), size = 0.5) +
+  geom_line(data = ssp126_yearly_avg, aes(x=year, y=sum, color="orange"), size = 0.5) + 
+  geom_line(data = ssp245_yearly_avg, aes(x=year, y=sum, color="red"), size = 0.5) +
+  geom_line(data = ssp370_yearly_avg, aes(x=year, y=sum, color = "blue"), size = 0.5) +
+  geom_line(data = ssp585_yearly_avg, aes(x=year, y=sum, color = "seagreen"), size = 0.5) +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
   scale_x_continuous(breaks=seq(2015,2100,10)) + 
@@ -235,18 +228,18 @@ yearly_avg_proj <-
   scale_color_manual(values = c("orange", "red", "blue", "seagreen"), labels = c("ssp126", "ssp245", "ssp370", "ssp585")) +
   labs(x = "Year",
        y = "Precipitation (in)") +
-  geom_smooth(data = ssp126_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "orange") + 
-  geom_smooth(data = ssp245_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "red") + 
-  geom_smooth(data = ssp370_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "blue") + 
-  geom_smooth(data = ssp585_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") + 
+  geom_smooth(data = ssp126_yearly_avg, aes(x=year, y=sum), method='lm', formula = y~x, color = "orange") + 
+  geom_smooth(data = ssp245_yearly_avg, aes(x=year, y=sum), method='lm', formula = y~x, color = "red") + 
+  geom_smooth(data = ssp370_yearly_avg, aes(x=year, y=sum), method='lm', formula = y~x, color = "blue") + 
+  geom_smooth(data = ssp585_yearly_avg, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") + 
   stat_regline_equation(label.y = 45) +
   stat_cor(label.y = 40)
 
 yearly_avg_proj
 
 ## historical 
-historical_yearly_plot <- 
-  ggplot(data = historical_yearly, aes(x=year, y=sum)) +
+historical_yearly_avg_plot <- 
+  ggplot(data = historical_yearly_avg, aes(x=year, y=sum)) +
   geom_line(size = 0.5,color="purple") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
@@ -258,12 +251,12 @@ historical_yearly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-historical_yearly_plot
+historical_yearly_avg_plot
 
 
 ## ssp126
-ssp126_yearly_plot <- 
-  ggplot(data = ssp126_yearly, aes(x=year, y=sum)) +
+ssp126_yearly_avg_plot <- 
+  ggplot(data = ssp126_yearly_avg, aes(x=year, y=sum)) +
   geom_line(size = 0.5,color="orange") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
@@ -275,12 +268,12 @@ ssp126_yearly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp126_yearly_plot
+ssp126_yearly_avg_plot
 
 
 ## ssp245
-ssp245_yearly_plot <- 
-  ggplot(data = ssp245_yearly, aes(x=year, y=sum)) +
+ssp245_yearly_avg_plot <- 
+  ggplot(data = ssp245_yearly_avg, aes(x=year, y=sum)) +
   geom_line(size = 0.5,color="red") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
@@ -292,11 +285,11 @@ ssp245_yearly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp245_yearly_plot
+ssp245_yearly_avg_plot
   
 ## ssp370
-ssp370_yearly_plot <- 
-  ggplot(data = ssp370_yearly, aes(x=year, y=sum)) +
+ssp370_yearly_avg_plot <- 
+  ggplot(data = ssp370_yearly_avg, aes(x=year, y=sum)) +
   geom_line(size = 0.5,color="blue") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
@@ -308,11 +301,11 @@ ssp370_yearly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp370_yearly_plot
+ssp370_yearly_avg_plot
 
 ## ssp585
-ssp585_yearly_plot <- 
-  ggplot(data = ssp585_yearly, aes(x=year, y=sum)) +
+ssp585_yearly_avg_plot <- 
+  ggplot(data = ssp585_yearly_avg, aes(x=year, y=sum)) +
   geom_line(size = 0.5,color="seagreen") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,50,10)) +
@@ -324,14 +317,14 @@ ssp585_yearly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp585_yearly_plot
+ssp585_yearly_avg_plot
 ```
 
 ## month by year projected precipiation analysis
 ```{r}
 ## historical monthly 
-historical_monthly_plot <- 
-  ggplot(data = historical_monthly, aes(x=date, y=sum)) +
+historical_monthly_avg_plot <- 
+  ggplot(data = historical_monthly_avg, aes(x=date, y=sum)) +
   geom_line(size = 0.5,color="purple") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
@@ -343,12 +336,12 @@ historical_monthly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-historical_monthly_plot
+historical_monthly_avg_plot
 
 
 ## ssp126 monthly 
-ssp126_monthly_plot <- 
-  ggplot(data = ssp126_monthly, aes(x=date, y=sum)) +
+ssp126_monthly_avg_plot <- 
+  ggplot(data = ssp126_monthly_avg, aes(x=date, y=sum)) +
   geom_line(size = 0.5,color="orange") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
@@ -360,11 +353,11 @@ ssp126_monthly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp126_monthly_plot
+ssp126_monthly_avg_plot
 
 ## ssp245 monthly 
-ssp245_monthly_plot <- 
-  ggplot(data = ssp245_monthly, aes(x=date, y=sum)) +
+ssp245_monthly_avg_plot <- 
+  ggplot(data = ssp245_monthly_avg, aes(x=date, y=sum)) +
   geom_line(size = 0.5,color="red") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
@@ -376,11 +369,11 @@ ssp245_monthly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp245_monthly_plot
+ssp245_monthly_avg_plot
 
 ## ssp370 monthly
-ssp370_monthly_plot <- 
-  ggplot(data = ssp370_monthly, aes(x=date, y=sum)) +
+ssp370_monthly_avg_plot <- 
+  ggplot(data = ssp370_monthly_avg, aes(x=date, y=sum)) +
   geom_line(size = 0.5,color="blue") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
@@ -392,11 +385,11 @@ ssp370_monthly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp370_monthly_plot
+ssp370_monthly_avg_plot
 
 ## ssp585 monthly
-ssp585_monthly_plot <- 
-  ggplot(data = ssp585_monthly, aes(x=date, y=sum)) +
+ssp585_monthly_avg_plot <- 
+  ggplot(data = ssp585_monthly_avg, aes(x=date, y=sum)) +
   geom_line(size = 0.5,color="seagreen") +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
@@ -408,16 +401,16 @@ ssp585_monthly_plot <-
    labs(x = "Year",
        y = "Precipitation (in)")
 
-ssp585_monthly_plot
+ssp585_monthly_avg_plot
 ```
 ## monthly combined projected precipation analysis 
 ```{r}
 monthly_avg_proj <- 
   ggplot() +
-  geom_line(data = ssp126_monthly, aes(x=date, y=sum, color= "orange"), size = 0.5) + 
-  geom_line(data = ssp245_monthly, aes(x=date, y=sum, color= "red"), size = 0.5) +
-  geom_line(data = ssp370_monthly, aes(x=date, y=sum, color = "blue"), size = 0.5) +
-  geom_line(data = ssp585_monthly, aes(x=date, y=sum, color = "seagreen"), size = 0.5) +
+  geom_line(data = ssp126_monthly_avg, aes(x=date, y=sum, color= "orange"), size = 0.5) + 
+  geom_line(data = ssp245_monthly_avg, aes(x=date, y=sum, color= "red"), size = 0.5) +
+  geom_line(data = ssp370_monthly_avg, aes(x=date, y=sum, color = "blue"), size = 0.5) +
+  geom_line(data = ssp585_monthly_avg, aes(x=date, y=sum, color = "seagreen"), size = 0.5) +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,20,5)) +
   #scale_x_continuous(breaks=seq(2015,2100,10)) + 
@@ -443,239 +436,6 @@ monthly_avg_proj
 # ggsave("img/ssp585_monthly_plot.png", ssp585_monthly_plot, height = 5, width = 7, dpi = 320)
 ```
 
-## Lets filter analysis for projections until 2050 instead of 2100 to see how much regression is altered.
-```{r}
-ssp126_2050 <- ssp126 %>% 
-  filter(year %in% (2015:2050))
-
-ssp245_2050 <- ssp245 %>% 
-  filter(year %in% (2015:2050))
-
-ssp370_2050 <- ssp370 %>% 
-  filter(year %in% (2015:2050))
-
-ssp585_2050 <- ssp585 %>% 
-  filter(year %in% (2015:2050))
-
-## also lets filter historical from 1964-2014 for 50 yr period 
-historical_2014 <- historical %>% 
-  filter(year %in% (1964:2014))
-
-## ssp126  til 2050
-ssp126_2050_monthly_plot <- 
-  ggplot(data = ssp126_2050, aes(x=date, y=pcp)) +
-  geom_line(size = 0.5,color="orange") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,7,1)) +
-  #scale_x_continuous(breaks=seq(2015,2100,10)) + 
-  ggtitle("Oahu, HI Daily Avg Precipitation, ssp126, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "orange") +
-  stat_regline_equation(label.y = 6) +
-  stat_cor(label.y = 5) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp126_2050_monthly_plot
-
-## ssp245  til 2050
-ssp245_2050_monthly_plot <- 
-  ggplot(data = ssp245_2050, aes(x=date, y=pcp)) +
-  geom_line(size = 0.5,color="red") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,7,1)) +
-  #scale_x_continuous(breaks=seq(2015,2100,10)) + 
-  ggtitle("Oahu, HI Daily Avg Precipitation, ssp245, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "red") +
-  stat_regline_equation(label.y = 6) +
-  stat_cor(label.y = 5) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp245_2050_monthly_plot
-
-## ssp370  til 2050
-ssp370_2050_monthly_plot <- 
-  ggplot(data = ssp370_2050, aes(x=date, y=pcp)) +
-  geom_line(size = 0.5,color="blue") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,7,1)) +
-  #scale_x_continuous(breaks=seq(2015,2100,10)) + 
-  ggtitle("Oahu, HI Daily Avg Precipitation, ssp370, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "blue") +
-  stat_regline_equation(label.y = 6) +
-  stat_cor(label.y = 5) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp370_2050_monthly_plot
-
-## ssp585 monthly til 2050
-ssp585_2050_monthly_plot <- 
-  ggplot(data = ssp585_2050, aes(x=date, y=pcp)) +
-  geom_line(size = 0.5,color="seagreen") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,7,1)) +
-  #scale_x_continuous(breaks=seq(2015,2100,10)) + 
-  ggtitle("Oahu, HI Daily Avg Precipitation, ssp585, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "seagreen") +
-  stat_regline_equation(label.y = 6) +
-  stat_cor(label.y = 5) + 
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp585_2050_monthly_plot
-
-## historical monthly 1964-2014
-historical_2014_monthly_plot <- 
-  ggplot(data = historical_2014, aes(x=date, y=pcp)) +
-  geom_line(size = 0.5,color="purple") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,7,1)) +
-  #scale_x_continuous(breaks=seq(2015,2100,10)) + 
-  ggtitle("Oahu, HI Daily Avg Precipitation, historical, CNRM-ESM2-1: 1964-2014") + 
-  geom_smooth(method='lm', formula = y~x, color = "purple") +
-  stat_regline_equation(label.y = 6) +
-  stat_cor(label.y = 5) + 
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-historical_2014_monthly_plot
-
-```
-
-
-## yealy regression til 2050 
-```{r}
-# group by yearly sum of pcp 
-ssp126_2050_yearly <- ssp126_2050 %>% 
-  group_by(year) %>% 
-  mutate(sum = sum(pcp)) %>% 
-  select(year, sum) %>% 
-  distinct()
-
-ssp126_2050_yearly$year <- as.numeric(ssp126_2050_yearly$year) 
-
-# group by yearly sum of pcp 
-ssp245_2050_yearly <- ssp245_2050 %>% 
-  group_by(year) %>% 
-  mutate(sum = sum(pcp)) %>% 
-  select(year, sum) %>% 
-  distinct()
-
-ssp245_2050_yearly$year <- as.numeric(ssp245_2050_yearly$year) 
-
-# group by yearly sum of pcp 
-ssp370_2050_yearly <- ssp370_2050 %>% 
-  group_by(year) %>% 
-  mutate(sum = sum(pcp)) %>% 
-  select(year, sum) %>% 
-  distinct()
-
-ssp370_2050_yearly$year <- as.numeric(ssp370_2050_yearly$year) 
-
-# group by yearly sum of pcp 
-ssp585_2050_yearly <- ssp585_2050 %>% 
-  group_by(year) %>% 
-  mutate(sum = sum(pcp)) %>% 
-  select(year, sum) %>% 
-  distinct()
-
-ssp585_2050_yearly$year <- as.numeric(ssp585_2050_yearly$year) 
-
-
-# group by yearly sum of pcp 
-historical_2014_yearly <- historical_2014 %>% 
-  group_by(year) %>% 
-  mutate(sum = sum(pcp)) %>% 
-  select(year, sum) %>% 
-  distinct()
-
-historical_2014_yearly$year <- as.numeric(historical_2014_yearly$year) 
-
-
-
-## ssp126 2050 plot
-ssp126_2050_yearly_plot <- 
-  ggplot(data = ssp126_2050_yearly, aes(x=year, y=sum)) +
-  geom_line(size = 0.5,color="orange") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_continuous(breaks=seq(2015,2050,10)) + 
-  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation,ssp126, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "orange") +
-  stat_regline_equation(label.y = 45) +
-  stat_cor(label.y = 40) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp126_2050_yearly_plot
-
-
-## ssp245 2050 plot 
-ssp245_2050_yearly_plot <- 
-  ggplot(data = ssp245_2050_yearly, aes(x=year, y=sum)) +
-  geom_line(size = 0.5,color="red") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_continuous(breaks=seq(2015,2050,10)) + 
-  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp245, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "red") +
-  stat_regline_equation(label.y = 45) +
-  stat_cor(label.y = 40) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp245_2050_yearly_plot
-  
-## ssp370 2050 plot 
-ssp370_2050_yearly_plot <- 
-  ggplot(data = ssp370_2050_yearly, aes(x=year, y=sum)) +
-  geom_line(size = 0.5, color="blue") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_continuous(breaks=seq(2015,2050,10)) + 
-  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp370, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "blue") +
-  stat_regline_equation(label.y = 45) +
-  stat_cor(label.y = 40) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp370_2050_yearly_plot
-
-## ssp585 2050 plot 
-ssp585_2050_yearly_plot <- 
-  ggplot(data = ssp585_2050_yearly, aes(x=year, y=sum)) +
-  geom_line(size = 0.5,color="seagreen") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_continuous(breaks=seq(2015,2050,10)) + 
-  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, ssp585, CNRM-ESM2-1: 2015-2050") + 
-  geom_smooth(method='lm', formula = y~x, color = "seagreen") +
-  stat_regline_equation(label.y = 45) +
-  stat_cor(label.y = 40) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-ssp585_2050_yearly_plot
-
-
-## historical 1964-2014 plot 
-historical_2014_yearly_plot <- 
-  ggplot(data = historical_2014_yearly, aes(x=year, y=sum)) +
-  geom_line(size = 0.5,color="purple") +
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_continuous(breaks=seq(1960,2020,10)) + 
-  ggtitle("Oahu, HI Yearly Sum of Daily Avg Precipitation, historical, CNRM-ESM2-1: 1964-2014") + 
-  geom_smooth(method='lm', formula = y~x, color = "purple") +
-  stat_regline_equation(label.y = 45) +
-  stat_cor(label.y = 40) +
-   labs(x = "Year",
-       y = "Precipitation (in)")
-
-historical_2014_yearly_plot
-```
 
 ## Daily total analysis 
 ```{r}
@@ -698,8 +458,6 @@ daily_tot_proj <-
     theme(legend.position="bottom")
 
 daily_tot_proj
-
-
 
 ```
 
@@ -839,7 +597,7 @@ ssp585_tot_monthly$date <- my(ssp585_tot_monthly$date)
 
 ## yearly total for all ssps and historical
 ```{r}
-## all three ssps 
+## all three ssps plotted below
 yearly_sum_proj <- 
   ggplot() +
   geom_line(data = historical_tot_yearly, aes(x=year, y=sum, color="black"), size = 0.5) +
@@ -850,7 +608,6 @@ yearly_sum_proj <-
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,450,50)) +
   scale_x_continuous(breaks=seq(1850,2100,50)) + 
-  # scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
   ggtitle("Oahu, HI Yearly Total Precipitation, CNRM-ESM2-1: 1850-2100") + 
   scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "ssp126", "ssp245", "ssp370", "ssp585")) +
   labs(x = "Year",
@@ -862,12 +619,11 @@ yearly_sum_proj <-
   geom_smooth(data = ssp585_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") +
   theme(legend.title=element_blank())+
     theme(legend.position="bottom")
-# +
-#   stat_regline_equation(label.y = 400) +
-#   stat_cor(label.y = 400)
 
 yearly_sum_proj
 ```
+
+
 ## monthly total for all ssps and historical
 ```{r}
 # all three ssps 
@@ -880,7 +636,6 @@ monthly_sum_proj <-
   geom_line(data = ssp585_tot_monthly, aes(x=date, y=sum, color = "seagreen"), size = 0.5) +
   theme_minimal() + 
   scale_y_continuous(breaks=seq(0,300,50)) +
-  #scale_x_continuous(breaks=seq(1850,2100,50)) + 
  scale_x_date(date_breaks = "50 years", date_labels = "%Y") +
   ggtitle("Oahu, HI Monthly Total Precipitation, CNRM-ESM2-1: 1850-2100") + 
   scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "ssp126", "ssp245", "ssp370", "ssp585")) +
@@ -893,72 +648,10 @@ monthly_sum_proj <-
   # geom_smooth(data = ssp585_tot_monthly, aes(x=date, y=sum), method='lm', formula = y~x, color = "seagreen") +
   theme(legend.title=element_blank())+
     theme(legend.position="bottom")
-# +
-#   stat_regline_equation(label.y = 400) +
-#   stat_cor(label.y = 400)
 
 monthly_sum_proj
 ```
 
-```{r}
-## separate historical total precip based on 30 yr time periods
-historical_tot_1984_2014 <- historical_tot %>% 
-  filter(year %in% (1984:2014))
-  
-## separate projections based on 2020 to 2070
-ssp126_tot_2020_2050 <- ssp126_tot %>% 
-  filter(year %in% (2020:2050))
-
-ssp245_tot_2020_2050 <- ssp245_tot %>% 
-  filter(year %in% (2020:2050))
-
-ssp370_tot_2020_2050 <- ssp370_tot %>% 
-  filter(year %in% (2020:2050))
-
-ssp585_tot_2020_2050 <- ssp585_tot %>% 
-  filter(year %in% (2020:2050))
-
-
-daily_tot_period <- 
-  ggplot() +
-  geom_line(data = historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +
-  geom_line(data = ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
-  geom_line(data = ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
-  geom_line(data = ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
-  geom_line(data = ssp585_tot_2020_2050, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
-  scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 1984-2050") +
-   labs(x = "Year",
-       y = "Precipitation (in)") +
-  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "spp126", "ssp245", "ssp370", "ssp585"))+
-   theme(legend.title=element_blank())+
-    theme(legend.position="bottom")+
-    theme(text = element_text(size=14))
-
-daily_tot_period
-
-# ggsave('cnrm_daily_tot_period.png', daily_tot_period, width = 12, height = 8, units = "in")
-```
-
-## historical 50 year period graph
-```{r}
-daily_tot_period_hist <- 
-  ggplot() +
-  geom_line(data = historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +  
-  theme_minimal() + 
-  scale_y_continuous(breaks=seq(0,50,10)) +
-  scale_x_date(date_breaks = "3.5 years", date_labels = "%Y") +
-  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1, historical: 1984-2014 ") +
-   labs(x = "Year",
-       y = "Precipitation (in)") +
-  scale_color_manual(values = c("black"), labels = c("historical")) + 
- theme(legend.title=element_blank()) +
-    theme(legend.position="bottom")
-
-daily_tot_period_hist
-```
 
 ## ratio of daily total precipitation in the future vs. historical periods
 ```{r}
@@ -1000,46 +693,8 @@ ggplot(data = ratio_df, aes(x=date, y=fut_hist_ratio,  group=ssp)) +
   scale_y_continuous(limits = c(0,0.0e+00))
 ```
 
-## look at analogeous storm event we will use for swmm 2009-10-11
-```{r}
-merge_his_proj_filt <- merge_his_proj %>% 
-  filter(month == "10") %>% 
-  filter(day == "11") %>% 
-  mutate(ssp126_hist = ssp126_pcp/hist_pcp,
-         ssp245_hist = ssp245_pcp/hist_pcp,
-         ssp370_hist = ssp370_pcp/hist_pcp,
-         ssp585_hist = ssp585_pcp/hist_pcp) %>% 
-  select(date, year, month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
-  pivot_longer(cols = ssp126_hist:ssp585_hist,
-               names_to = c("ssp"),
-               values_to = "fut_hist_ratio")
 
-
-ssp_names <- c(
-                    `ssp126_hist` = "ssp 1-2.6",
-                    `ssp245_hist` = "ssp 2-4.5",
-                    `ssp370_hist` = "ssp 3-7.0",
-                    `ssp585_hist` = "ssp 5-8.5"
-                    )
-
-
-proj_hist_oct11_CRNM<- ggplot(data = merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
-  geom_boxplot() +
-  facet_wrap(~ssp, labeller = as_labeller(ssp_names)) +
-  theme_minimal() +
-  labs(x="Year", 
-       y="Future Projection/Historical Daily Total Ratio (Oct 11)", 
-       caption = "Data Source: CNRM-ESM2-1") +
-  scale_y_continuous(limits = c(0,30)) +
-    theme(text = element_text(size=15))
-
-proj_hist_oct11_CRNM
-
-#ggsave('proj_hist_oct11_CRNM.png', proj_hist_oct11_CRNM, width = 12, height = 10, units = "in")
-                     
-```
-
-## December 19, 2010 = One Wailupe storm that we will use to do CC analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
+## December 19, 2010 = One Wailupe storm that we will use to do climate analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
 ```{r}
 merge_his_proj_filt_dec19 <- merge_his_proj %>% 
   filter(month == "12") %>% 
@@ -1083,7 +738,7 @@ proj_hist_dec19_cnrm
 
 ```
 
-## March 14, 2009 = Another Wailupe storm that we will use to do CC analysis with. 
+## March 14, 2009 Wailupe storm that we will use to do Climate Change analysis with. Here we are taking up the ratio of projected daily total precip avg from 2020-2050 / historical daily total precip avg from 1984-2014. 
 ```{r}
 merge_his_proj_filt_mar14 <- merge_his_proj %>% 
   filter(month == "3") %>% 
