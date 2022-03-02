@@ -15,7 +15,7 @@ library(RColorBrewer)
 
 ```{r}
 ## read in wailupe precip data from NOAA
-wailupe_77_rain <- read.csv(here("Paiko","NOAA_WailupeHawaiiKai_77.csv"))
+wailupe_77_rain <- read.csv(here("probability_distribution", "NOAA_WailupeHawaiiKai_77.csv"))
 
 ##Use lubridate to clean up the dates and times
 wailupe_77_rain$DATE <- ymd(wailupe_77_rain$DATE)
