@@ -2,7 +2,7 @@
 title: "Probabilty Distribution Function: Climate Change Analysis"
 author: "Elmera Azadpour"
 date: "1/30/2022"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +15,7 @@ library(RColorBrewer)
 
 ```{r}
 ## read in wailupe precip data from NOAA
-wailupe_77_rain <- read.csv(here("probability_distribution", "NOAA_WailupeHawaiiKai_77.csv"))
+wailupe_77_rain <- read.csv(here("climate_change_data", "probabilty_distribution", "NOAA_WailupeHawaiiKai_77.csv"))
 
 ##Use lubridate to clean up the dates and times
 wailupe_77_rain$DATE <- ymd(wailupe_77_rain$DATE)
@@ -61,7 +61,7 @@ wailupe_daily_77$date <- ymd(wailupe_daily_77$date)
 ```
 
 
-## PDF code: https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html
+## PDF code sourced from: https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html
 ```{r}
 
 z=wailupe_daily_77$daily_pcp
@@ -70,18 +70,12 @@ dStandardNormal <- data.frame(daily_pcp=z,
                                Density=dnorm(z, mean=0.3498252, sd=0.5167536),
                                Distribution=pnorm(z, mean=0.3498252, sd=0.5167536),
                               Quantile = qnorm(z, mean=0.3498252, sd=0.5167536))  
-  
-# 
-#   qStandardNormal <- data.frame(daily_pcp=z,
-#                                 Quantile=qnorm(z, mean=0, sd=1))
-  
-# ggplot(data=qStandardNormal, aes(x=daily_pcp, y= Quantile)) +
-#   geom_line(size=1.5)
 
+## add color pallete 
 cbp2 <- c("#000000", "#009E73",
            "#D55E00")
 
-
+## plot density distribution plot
 pdf_plot_density <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
   geom_line(size=1.5) +
   theme_classic() +
