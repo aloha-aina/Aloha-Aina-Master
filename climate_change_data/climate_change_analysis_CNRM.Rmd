@@ -651,14 +651,73 @@ monthly_sum_proj <-
 
 monthly_sum_proj
 ```
+## separate historical total precip based on 30 yr time periods
+```{r}
+cnrm_historical_tot_1984_2014 <- historical_tot %>% 
+  filter(year %in% (1984:2014))
+  
+## separate projections based on 2020 to 2070
+cnrm_ssp126_tot_2020_2050 <- ssp126_tot %>% 
+  filter(year %in% (2020:2050))
 
+cnrm_ssp245_tot_2020_2050 <- ssp245_tot %>% 
+  filter(year %in% (2020:2050))
+
+cnrm_ssp370_tot_2020_2050 <- ssp370_tot %>% 
+  filter(year %in% (2020:2050))
+
+cnrm_ssp585_tot_2020_2050 <- ssp585_tot %>% 
+  filter(year %in% (2020:2050))
+
+
+cnrm_daily_tot_period <- 
+  ggplot() +
+  geom_line(data = cnrm_historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) + 
+  geom_line(data = cnrm_ssp126_tot_2020_2050, aes(x=date, y=pcp, color="orange"), size = 0.5) + 
+  geom_line(data = cnrm_ssp245_tot_2020_2050, aes(x=date, y=pcp, color="red"), size = 0.5) +
+  geom_line(data = cnrm_ssp370_tot_2020_2050, aes(x=date, y=pcp, color = "blue"), size = 0.5) +
+  geom_line(data = cnrm_ssp585_tot_2020_2050, aes(x=date, y=pcp, color = "seagreen"), size = 0.5) + 
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,100,10), limits = c(0, 100)) +
+  scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1: 1984-2050") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("black", "orange", "red", "blue", "seagreen"), labels = c("historical", "spp126", "ssp245", "ssp370", "ssp585")) +
+   theme(legend.title=element_blank())+
+    theme(legend.position="bottom") +
+    theme(text = element_text(size=14))
+
+cnrm_daily_tot_period
+
+#ggsave('cnrm_daily_tot_period.png', cnrm_daily_tot_period, width = 12, height = 8, units = "in")
+
+```
+
+## historical 50 year period graph
+```{r}
+cnrm_daily_tot_period_hist <- 
+  ggplot() +
+  geom_line(data = cnrm_historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +  
+  theme_minimal() + 
+  scale_y_continuous(breaks=seq(0,50,10)) +
+  scale_x_date(date_breaks = "3.5 years", date_labels = "%Y") +
+  ggtitle("Oahu, HI Daily Total Precipitation, CNRM-ESM2-1, historical: 1984-2014 ") +
+   labs(x = "Year",
+       y = "Precipitation (in)") +
+  scale_color_manual(values = c("black"), labels = c("historical")) + 
+ theme(legend.title=element_blank()) +
+    theme(legend.position="bottom")
+
+cnrm_daily_tot_period_hist
+```
 
 ## ratio of daily total precipitation in the future vs. historical periods
 ```{r}
 ## merge the data frames together 
-daily_tot_prec_merge1 <- ssp126_tot_2020_2050 %>% right_join(ssp245_tot_2020_2050, by = c("date")) 
-daily_tot_prec_merge2 <- daily_tot_prec_merge1 %>%  right_join(ssp370_tot_2020_2050, by = c("date"))
-daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(ssp585_tot_2020_2050,by = c("date")) %>% 
+daily_tot_prec_merge1 <- cnrm_ssp126_tot_2020_2050 %>% right_join(cnrm_ssp245_tot_2020_2050, by = c("date")) 
+daily_tot_prec_merge2 <- daily_tot_prec_merge1 %>%  right_join(cnrm_ssp370_tot_2020_2050, by = c("date"))
+daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(cnrm_ssp585_tot_2020_2050,by = c("date")) %>% 
   select(date, year.x, month.x, day.x, pcp.x, pcp.y, pcp.x.x, pcp.y.y) %>% 
   rename(year = year.x,
          month = month.x,
@@ -668,7 +727,7 @@ daily_tot_prec_merge_fin <- daily_tot_prec_merge2 %>% right_join(ssp585_tot_2020
          ssp370_pcp = pcp.x.x ,
          ssp585_pcp = pcp.y.y )
 
-historical_tot_1984_2014_rename <- historical_tot_1984_2014 %>% 
+historical_tot_1984_2014_rename <- cnrm_historical_tot_1984_2014 %>% 
   rename(hist_date = date,
          hist_pcp = pcp,
          hist_year = year,
