@@ -586,7 +586,7 @@ subcatch_min_total <- subcatch_min %>%
     name = "Runoff Coefficient") +
   theme(legend.position = "bottom") +
   labs(title = "Min MCF") +
-  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 3.1) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank()) +
@@ -600,7 +600,7 @@ theme(axis.text.x = element_text(angle = 90)) +
 
 subcatch_min_total
 
- # ggsave('subcatch_min_total_binned.png', subcatch_min_total, width = 5, height = 7, units = "in")
+  # ggsave('subcatch_min_total_binned.png', subcatch_min_total, width = 5, height = 7, units = "in")
 
 
 
@@ -618,7 +618,7 @@ subcatch_max_total <- subcatch_max %>%
     super = metR::ScaleDiscretised,
     name = "Runoff Coefficient") +
   labs(title = "Max MCF") +
-  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 3.1) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank()) +
@@ -652,7 +652,7 @@ subcatch_min_peak <- subcatch_min %>%
     super = metR::ScaleDiscretised,
     name = "Peak Discharge (cfs)") +
   labs(title = "Min MCF") +
-  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 3.1) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank()) +
@@ -682,7 +682,7 @@ subcatch_max_peak <- subcatch_max %>%
     super = metR::ScaleDiscretised,
     name = "Peak Discharge (cfs)") +
   labs(title = "Max MCF") +
-  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 1.8) +
+  geom_sf_text(aes(label = subcatchment), colour = "black", fontface = "bold", size = 3.1) +
   # geom_sf_label(aes(label = subcatchment), size = 1.5) +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank()) +
@@ -698,5 +698,50 @@ subcatch_max_peak
 
 # ggsave('subcatch_max_peak_removedsubs_themevoid_binned.png', subcatch_max_peak, width = 5, height = 7, units = "in")
 
+```
+## combine max and min runoff coefficient results into single table showing the catchment #, min, and max runoff coefficient, slope, percent impervious, and area (sqft)
+```{r}
+results_min_mcf_rc <- results_min_mcf %>%
+  select(subcatchment, Slope, percent_imp, Area_sqft, runoff_coeff) %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  arrange(desc(runoff_coeff)) %>%
+  top_n(20,runoff_coeff)
+
+results_max_mcf_rc <- results_max_mcf %>%
+  select(subcatchment, Slope, percent_imp, Area_sqft, runoff_coeff) %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  arrange(desc(runoff_coeff)) %>%
+  top_n(20,runoff_coeff)
+
+results_runoffcoef_table <- results_min_mcf_rc %>%
+  full_join(results_max_mcf_rc, by=c("subcatchment", "Slope", "percent_imp", "Area_sqft")) %>%
+  kable(col.names=c("Subcatchment","Slope", "Percent Impervious", "Area (sqft)", "Runoff Coefficient, Min MCF",
+                                "Runoff Coefficient, Max MCF")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+results_runoffcoef_table
+```
+
+## combine max and min peak runoff (cfs) results into single table showing the catchment #, min, and max peak runoff (cfs)
+```{r}
+results_min_mcf_peak <- results_min_mcf %>%
+  select(subcatchment, Slope, percent_imp, Area_sqft, peak_runoff_cfs) %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  arrange(desc(peak_runoff_cfs)) %>%
+  top_n(20,peak_runoff_cfs)
+
+results_max_mcf_peak <- results_max_mcf %>%
+  select(subcatchment, Slope, percent_imp, Area_sqft, peak_runoff_cfs) %>%
+  filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
+  arrange(desc(peak_runoff_cfs)) %>%
+  top_n(20,peak_runoff_cfs)
+
+results_peakflow_table <- results_min_mcf_peak %>%
+  full_join(results_max_mcf_peak, by=c("subcatchment", "Slope", "percent_imp", "Area_sqft")) %>%
+  kable(col.names=c("Subcatchment","Slope", "Percent Impervious", "Area (sqft)","Peak Runoff (cfs), Min MCF",
+                                "Peak Runoff (cfs), Max MCF")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+results_peakflow_table
 ```
 

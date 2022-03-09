@@ -58,6 +58,7 @@ wailupe_daily_77 <- wailupe_tidy_77 %>%
     daily_vol = sum(qgag)) ## gives total summed precip data per day. HT is given in inches.
 
 wailupe_daily_77$date <- ymd(wailupe_daily_77$date)
+wailupe_tidy_77$date <- ymd(wailupe_tidy_77$date)
 ```
 
 
@@ -95,4 +96,49 @@ pdf_plot_density
 #  ggsave('pdf_MCF.png', pdf_plot_density, width = 16, height = 9, units = "in")
 
 ```
+## PDF with the scaled march 14, 2009 storm
+```{r}
+## take average of March 14, 2009
+wailupe_tidy_77_march14 <- wailupe_tidy_77 %>% 
+  filter(date >= as.Date("2009-03-14") & date <= as.Date("2009-03-14"))
 
+mean(wailupe_tidy_77_march14$qpcp) # mean of March 14, 2009 storm = 0.2
+
+## plot density distribution plot
+pdf_plot_density_corrected <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
+  geom_line(size=1.5) +
+  theme_classic() +
+  labs(x= "Daily Precipitation (in)") +
+  geom_vline(xintercept = 1.462713, linetype="solid",  ## 2.20 (Max MCF) * 0.6648695 = 1.462713
+                color = "#D55E00", size=1.5) +
+  geom_vline(xintercept = 0.2659478, linetype="solid",  ## 0.40 (Min MCF) * 0.6648695 = 0.2659478
+                color = "#009E73", size=1.5) +
+  # annotate("text", x = 4.75, y = 0.75, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
+  # annotate("text", x = 4.75, y = 0.70, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
+    theme(text = element_text(size=22)) +
+scale_x_continuous(breaks=seq(0,5,0.5)) +
+scale_y_continuous(breaks=seq(0,0.8,0.1))
+
+pdf_plot_density_corrected
+
+
+## plot density distribution plot
+pdf_plot_density_corrected2 <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
+  geom_line(size=1.5) +
+  theme_classic() +
+  labs(x= "Daily Precipitation (in)") +
+  geom_vline(xintercept = 0.44, linetype="solid",  ## 2.20 (Max MCF) * 0.2 = 0.44
+                color = "#D55E00", size=1.5) +
+  geom_vline(xintercept = 0.08, linetype="solid",  ## 0.40 (Min MCF) * 0.2 = 0.08
+                color = "#009E73", size=1.5) +
+  # annotate("text", x = 4.75, y = 0.75, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
+  # annotate("text", x = 4.75, y = 0.70, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
+    theme(text = element_text(size=22)) +
+scale_x_continuous(breaks=seq(0,5,0.5)) +
+scale_y_continuous(breaks=seq(0,0.8,0.1))
+
+pdf_plot_density_corrected2
+
+
+#  ggsave('pdf_MCF_mar14.png', pdf_plot_density_corrected2, width = 16, height = 9, units = "in")
+```
