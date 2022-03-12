@@ -111,7 +111,7 @@ calibrate_graph <- ggplot()+
 
 calibrate_graph
 
-ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
+# ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
 ```
 
 
@@ -743,5 +743,28 @@ results_peakflow_table <- results_min_mcf_peak %>%
   kable_styling(bootstrap_options = "striped")
 
 results_peakflow_table
+```
+
+## comparing historical vs Max MCF runoff coeffiecients from Dornan et al., 2020
+```{r}
+## runoff coefficients differences
+dornan_results_top20_rc <- read_csv("~/Desktop/Aloha-Aina-Master/climate_change_data/SWMM_results/dornan_results_top20_rc.csv") %>% 
+  select(subcatchment, runoff_coeff) # read in Team Kahuawais RC results
+
+aa3 <- results_max_mcf_rc %>%  select(subcatchment, runoff_coeff) # select just our subcatchment and runoff coefficients to be able to subtract 
+
+aa <- dornan_results_top20_rc %>%  right_join(aa3, by = c("subcatchment"))
+
+aa3 = aa %>%  mutate(subtract = runoff_coeff.y-runoff_coeff.x)
+
+## peak flow differences 
+dornan_results_top20_peakflow <- read_csv("~/Desktop/Aloha-Aina-Master/climate_change_data/SWMM_results/dornan_results_top20_peakflow.csv") %>% 
+  select(subcatchment, peak_runoff_cfs) # read in Team Kahuawais peak flow results
+
+aa4 <- results_max_mcf_peak %>%  select(subcatchment, peak_runoff_cfs) # select just our subcatchment and peak runoff cfs to be able to subtract 
+
+aa5<- dornan_results_top20_peakflow %>%  right_join(aa4, by = c("subcatchment"))
+
+aa6 = aav5 %>%  mutate(subtract = peak_runoff_cfs.y-peak_runoff_cfs.x)
 ```
 
