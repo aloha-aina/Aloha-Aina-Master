@@ -2,7 +2,8 @@
 title: "Graphs of Climate Change SWMM Results"
 author: "Elmera Azadpour"
 date: "1/24/2022"
-output: html_document
+output:
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -31,23 +32,6 @@ discharge_MCF_min<- merge(observed, simulated_min_march14, by = "time_step")
 
 
 summary(discharge_MCF_max)
-
-# statical analyses
-# dischargettest<- t.test(discharge_MCF_max$discharge_obs_cfs, discharge_MCF_max$simulated_flow_cfs)
-# 
-# regress<- lm(discharge_obs_cfs ~ simulated_flow_cfs, data = discharge_MCF_max)
-# 
-# regress
-# 
-# sim<- discharge_MCF_max$simulated_flow_cfs
-# obs<- discharge_MCF_max$discharge_obs_cfs
-# 
-# 
-# sutcliffe<- NSE(sim, obs, na.rm=TRUE, FUN=NULL, epsilon=c("Pushpalatha2012"))
-# 
-# sutcliffe
-
-# write.csv(discharge,file = "discharge_obv_sim1.csv", row.names = FALSE)
 
 graph_max<- ggplot(discharge_MCF_max, aes(x=discharge_obs_cfs, simulated_flow_cfs))+
   geom_point()
@@ -114,10 +98,8 @@ calibrate_graph
 # ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
 ```
 
-
-
 ## Analysis of MCF max storm results
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 subcatch_max_mcf<- read_csv("subcatchments_all.csv") %>% 
   mutate(subcatchment= OBJECTID_1) %>% 
   select(subcatchment, Curve_Number, Slope, percent_imp, Area_sqft)
@@ -211,7 +193,7 @@ regress_table_max_mcf
 
 
 ## Analysis of MCF min storm results
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 subcatch_min_mcf<- read_csv("subcatchments_all.csv") %>% 
   mutate(subcatchment= OBJECTID_1) %>% 
   select(subcatchment, Curve_Number, Slope, percent_imp, Area_sqft)
@@ -303,19 +285,19 @@ regress_table_min_mcf<- stargazer(results_min_mcf_regression, type ="html", digi
                        omit.stat = c("rsq"))
 regress_table_min_mcf
 ```
-
-
 ## Maps of SWMM Results
+```{r, include = FALSE}
 ### Code setup - Load packages
-```{r, warning = FALSE, message = FALSE}
 library(sf) #For shapefiles
 library(tmap) #For mapmaking
 library(tmaptools) #For mapmaking
 library(janitor) #For cleaning names
+library(RColorBrewer) # for binning color gradient
+library(metR) # for binning color gradient
 ```
 
 ###  Maps for MCF max storm hotspots
-```{r, message=FALSE, warning = FALSE, message = FALSE}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 
 results_max_mcf<- read_csv("results_max_mcf.csv") ##read in file from code above
 
@@ -406,7 +388,7 @@ subcatch_max_total
 ```
 
 ###  Maps for MCF min storm hotspots
-```{r, message=FALSE, warning = FALSE, message = FALSE}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 
 results_min_mcf<- read_csv("results_min_mcf.csv") ##read in file from code above
 
@@ -494,9 +476,8 @@ subcatch_min_total
 
 ```
 
-
 ## Normalized Peak Discharge Maps 
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 subcatch_max_normalized <- read_sf(dsn = here("climate_change_data", "SWMM_results","shapefiles"), layer = "subcatch_outline") %>%
   st_transform(st_crs(4326)) %>% 
   clean_names() %>% 
@@ -560,11 +541,7 @@ subcatch_min_peak_normalized
  # ggsave('subcatch_min_peak_removedsub_themevoid_norm.png', subcatch_min_peak_normalized, width = 5, height = 7, units = "in")
 ```
 ## binned runoff coefficient maps for min and max MCF 
-```{r}
-library(RColorBrewer)
-library(metR)
-
-
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 # View a single RColorBrewer palette by specifying its name
 display.brewer.pal(n = 7, name = 'Blues')
 # Hexadecimal color specification
@@ -602,8 +579,6 @@ subcatch_min_total
 
   # ggsave('subcatch_min_total_binned.png', subcatch_min_total, width = 5, height = 7, units = "in")
 
-
-
 mycols <- brewer.pal(n = 11, name = "Blues")
 mybreaks_max<- c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 
@@ -635,9 +610,8 @@ subcatch_max_total
  # ggsave('subcatch_max_total_binned.png', subcatch_max_total, width = 5, height = 7, units = "in")
 
 ```
-
-```{r}
-
+## binned peak flow  maps for min and max MCF 
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 mycols2 <- brewer.pal(n = 11, name = "Greens")
 mybreaks2_min<- c(0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0)
 
@@ -700,7 +674,7 @@ subcatch_max_peak
 
 ```
 ## combine max and min runoff coefficient results into single table showing the catchment #, min, and max runoff coefficient, slope, percent impervious, and area (sqft)
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 results_min_mcf_rc <- results_min_mcf %>%
   select(subcatchment, Slope, percent_imp, Area_sqft, runoff_coeff) %>%
   filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
@@ -723,7 +697,7 @@ results_runoffcoef_table
 ```
 
 ## combine max and min peak runoff (cfs) results into single table showing the catchment #, min, and max peak runoff (cfs)
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 results_min_mcf_peak <- results_min_mcf %>%
   select(subcatchment, Slope, percent_imp, Area_sqft, peak_runoff_cfs) %>%
   filter(!subcatchment %in% c(1, 2,94,3,38, 24)) %>%
@@ -746,25 +720,25 @@ results_peakflow_table
 ```
 
 ## comparing historical vs Max MCF runoff coeffiecients from Dornan et al., 2020
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 ## runoff coefficients differences
 dornan_results_top20_rc <- read_csv("~/Desktop/Aloha-Aina-Master/climate_change_data/SWMM_results/dornan_results_top20_rc.csv") %>% 
-  select(subcatchment, runoff_coeff) # read in Team Kahuawais RC results
+  select(subcatchment, runoff_coeff) # read in dorana et al RC results
 
-aa3 <- results_max_mcf_rc %>%  select(subcatchment, runoff_coeff) # select just our subcatchment and runoff coefficients to be able to subtract 
+results_max_mcf_rc_summary <- results_max_mcf_rc %>%  select(subcatchment, runoff_coeff) # select just our subcatchment and runoff coefficients to be able to subtract 
 
-aa <- dornan_results_top20_rc %>%  right_join(aa3, by = c("subcatchment"))
+combined_rc_results <- dornan_results_top20_rc %>%  right_join(results_max_mcf_rc_summary, by = c("subcatchment")) # combine dornan results with our max MCF reslts 
 
-aa3 = aa %>%  mutate(subtract = runoff_coeff.y-runoff_coeff.x)
+combined_rc_results = combined_rc_results %>%  mutate(subtract = runoff_coeff.y-runoff_coeff.x) # add column with difference between max MCF rc results - dornan historical rc results with March 14, 09 storm 
 
 ## peak flow differences 
 dornan_results_top20_peakflow <- read_csv("~/Desktop/Aloha-Aina-Master/climate_change_data/SWMM_results/dornan_results_top20_peakflow.csv") %>% 
   select(subcatchment, peak_runoff_cfs) # read in Team Kahuawais peak flow results
 
-aa4 <- results_max_mcf_peak %>%  select(subcatchment, peak_runoff_cfs) # select just our subcatchment and peak runoff cfs to be able to subtract 
+results_max_mcf_peak_summary <- results_max_mcf_peak %>%  select(subcatchment, peak_runoff_cfs) # select just our subcatchment and peak runoff cfs to be able to subtract 
 
-aa5<- dornan_results_top20_peakflow %>%  right_join(aa4, by = c("subcatchment"))
+combined_peak_results <- dornan_results_top20_peakflow %>%  right_join(results_max_mcf_peak_summary, by = c("subcatchment"))
 
-aa6 = aav5 %>%  mutate(subtract = peak_runoff_cfs.y-peak_runoff_cfs.x)
+combined_peak_results = combined_peak_results %>%  mutate(subtract = peak_runoff_cfs.y-peak_runoff_cfs.x)
 ```
 

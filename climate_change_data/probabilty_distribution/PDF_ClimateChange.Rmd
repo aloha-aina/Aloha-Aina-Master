@@ -13,7 +13,7 @@ library(here)
 library(RColorBrewer)
 ```
 
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 ## read in wailupe precip data from NOAA
 wailupe_77_rain <- read.csv(here("climate_change_data", "probabilty_distribution", "NOAA_WailupeHawaiiKai_77.csv"))
 
@@ -22,7 +22,7 @@ wailupe_77_rain$DATE <- ymd(wailupe_77_rain$DATE)
 
 ```
 
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 ## for wailupe 1977-2014
 wailupe_tidy_77 <- wailupe_77_rain %>% 
   rename(station = STATION, station_name = STATION_NAME, elevation = ELEVATION, 
@@ -61,43 +61,18 @@ wailupe_daily_77$date <- ymd(wailupe_daily_77$date)
 wailupe_tidy_77$date <- ymd(wailupe_tidy_77$date)
 ```
 
-
-## PDF code sourced from: https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html
-```{r}
-
+## PDF with the scaled march 14, 2009 storm (PDF code sourced from: https://rstudio-pubs-static.s3.amazonaws.com/100906_8e3a32dd11c14b839468db756cee7400.html)
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 z=wailupe_daily_77$daily_pcp
 
 dStandardNormal <- data.frame(daily_pcp=z,
                                Density=dnorm(z, mean=0.3498252, sd=0.5167536),
                                Distribution=pnorm(z, mean=0.3498252, sd=0.5167536),
                               Quantile = qnorm(z, mean=0.3498252, sd=0.5167536))  
-
 ## add color pallete 
 cbp2 <- c("#000000", "#009E73",
            "#D55E00")
 
-## plot density distribution plot
-pdf_plot_density <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
-  geom_line(size=1.5) +
-  theme_classic() +
-  labs(x= "Daily Precipitation (in)") +
-  geom_vline(xintercept = 0.77, linetype="solid", 
-                color = "#D55E00", size=1.5) +
-  geom_vline(xintercept = 0.14, linetype="solid", 
-                color = "#009E73", size=1.5) +
-  # annotate("text", x = 4.75, y = 0.75, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
-  # annotate("text", x = 4.75, y = 0.70, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
-    theme(text = element_text(size=22)) +
-scale_x_continuous(breaks=seq(0,5,0.5)) +
-scale_y_continuous(breaks=seq(0,0.8,0.1))
-
-pdf_plot_density
-
-#  ggsave('pdf_MCF.png', pdf_plot_density, width = 16, height = 9, units = "in")
-
-```
-## PDF with the scaled march 14, 2009 storm
-```{r}
 ## take average of March 14, 2009
 wailupe_tidy_77_march14 <- wailupe_tidy_77 %>% 
   filter(date >= as.Date("2009-03-14") & date <= as.Date("2009-03-14"))
@@ -105,25 +80,7 @@ wailupe_tidy_77_march14 <- wailupe_tidy_77 %>%
 mean(wailupe_tidy_77_march14$qpcp) # mean of March 14, 2009 storm = 0.2
 
 ## plot density distribution plot
-pdf_plot_density_corrected <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
-  geom_line(size=1.5) +
-  theme_classic() +
-  labs(x= "Daily Precipitation (in)") +
-  geom_vline(xintercept = 1.462713, linetype="solid",  ## 2.20 (Max MCF) * 0.6648695 = 1.462713
-                color = "#D55E00", size=1.5) +
-  geom_vline(xintercept = 0.2659478, linetype="solid",  ## 0.40 (Min MCF) * 0.6648695 = 0.2659478
-                color = "#009E73", size=1.5) +
-  # annotate("text", x = 4.75, y = 0.75, label = "Max MCF * avg pcp", color = "#D55E00", size =5) +
-  # annotate("text", x = 4.75, y = 0.70, label = "Min MCF * avg pcp", color = "#009E73",size =5) +
-    theme(text = element_text(size=22)) +
-scale_x_continuous(breaks=seq(0,5,0.5)) +
-scale_y_continuous(breaks=seq(0,0.8,0.1))
-
-pdf_plot_density_corrected
-
-
-## plot density distribution plot
-pdf_plot_density_corrected2 <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
+pdf_plot_density <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= Density)) +
   geom_line(size=1.5) +
   theme_classic() +
   labs(x= "Daily Precipitation (in)") +
@@ -137,8 +94,7 @@ pdf_plot_density_corrected2 <- ggplot(data=dStandardNormal, aes(x=daily_pcp, y= 
 scale_x_continuous(breaks=seq(0,5,0.5)) +
 scale_y_continuous(breaks=seq(0,0.8,0.1))
 
-pdf_plot_density_corrected2
-
+pdf_plot_density
 
 #  ggsave('pdf_MCF_mar14.png', pdf_plot_density_corrected2, width = 16, height = 9, units = "in")
 ```

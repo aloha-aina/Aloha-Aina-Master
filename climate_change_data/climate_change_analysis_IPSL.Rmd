@@ -1,8 +1,11 @@
 ---
-title: "Climate Change Projections: IPSL-CM6A-LR"
+title: 'Climate Change Projections: IPSL-CM6A-LR'
 author: "Elmera Azadpour"
 date: "1/14/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -14,10 +17,11 @@ library(ggpubr)
 library(zoo)
 library(scales)
 library(ggplot2)
+library(knitr)
 ```
 
 ## read in daily total climate projection and historical data exported from jupyter notebook, code can be found here: https://github.com/aloha-aina/Aloha-Aina-Master 
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ## Note: these data are from climate model IPSL-CM6A-LR (France)
 ## daily totals
 ipsl_historical_tot = read.csv(here("climate_change_data", "IPSL_daily_tot","oahu_historical_1850_2014_total.csv")) %>%  
@@ -39,7 +43,7 @@ ipsl_ssp585_tot$date <- ymd(ipsl_ssp585_tot$date)
 ```
 
 ## Daily total visualization 
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ipsl_daily_tot_proj <- 
   ggplot() +
   geom_line(data = ipsl_historical_tot, aes(x=date, y=pcp, color= "black"), size = 0.5) + 
@@ -59,11 +63,9 @@ ipsl_daily_tot_proj <-
     theme(legend.position="bottom")
 
 ipsl_daily_tot_proj
-
 ```
-
 ## daily totals by month 
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 # add seperate columns for year, month and day
 ipsl_historical_tot <- ipsl_historical_tot %>% 
   mutate(year = year(date)) %>% 
@@ -137,7 +139,6 @@ ipsl_ssp585_tot_yearly <- ipsl_ssp585_tot %>%
 
 ipsl_ssp585_tot_yearly$year <- as.numeric(ipsl_ssp585_tot_yearly$year) 
 
-
 # group by month (and associated year) sum of pcp
 ipsl_historical_tot_monthly <- ipsl_historical_tot %>% 
   group_by(month,year) %>% 
@@ -149,7 +150,6 @@ ipsl_historical_tot_monthly$date <- format(as.Date(paste(ipsl_historical_tot_mon
 
 ipsl_historical_tot_monthly$date <- my(ipsl_historical_tot_monthly$date)
 
-
 # group by month (and associated year) sum of pcp
 ipsl_ssp126_tot_monthly <- ipsl_ssp126_tot %>% 
   group_by(month,year) %>% 
@@ -160,7 +160,6 @@ ipsl_ssp126_tot_monthly <- ipsl_ssp126_tot %>%
 ipsl_ssp126_tot_monthly$date <- format(as.Date(paste(ipsl_ssp126_tot_monthly$year, ipsl_ssp126_tot_monthly$month, 01), "%Y %m %d"), "%m-%Y")
 
 ipsl_ssp126_tot_monthly$date <- my(ipsl_ssp126_tot_monthly$date)
-
 
 # group by month (and associated year) sum of pcp
 ipsl_ssp245_tot_monthly <- ipsl_ssp245_tot %>% 
@@ -174,7 +173,7 @@ ipsl_ssp245_tot_monthly$date <- format(as.Date(paste(ipsl_ssp245_tot_monthly$yea
 ipsl_ssp245_tot_monthly$date <- my(ipsl_ssp245_tot_monthly$date)
 
 # group by yearly sum of daily avg pcp 
-ipsl_ssp370_tot_monthly <- bcc_ssp370_tot %>% 
+ipsl_ssp370_tot_monthly <- ipsl_ssp370_tot %>% 
   group_by(month,year) %>% 
   mutate(sum = sum(pcp)) %>% 
   select(month, year, sum) %>% 
@@ -197,7 +196,7 @@ ipsl_ssp585_tot_monthly$date <- my(ipsl_ssp585_tot_monthly$date)
 ```
 
 ## yearly total for all ssps and historical
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ## all three ssps 
 ipsl_yearly_sum_proj <- 
   ggplot() +
@@ -221,15 +220,11 @@ ipsl_yearly_sum_proj <-
   geom_smooth(data = ipsl_ssp585_tot_yearly, aes(x=year, y=sum), method='lm', formula = y~x, color = "seagreen") +
   theme(legend.title=element_blank())+
     theme(legend.position="bottom")
-# +
-#   stat_regline_equation(label.y = 400) +
-#   stat_cor(label.y = 400)
 
 ipsl_yearly_sum_proj
 ```
-
 ## monthly totals 
-```{r}
+```{r,fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 # all three ssps 
 ipsl_monthly_sum_proj <- 
   ggplot() +
@@ -260,7 +255,7 @@ ipsl_monthly_sum_proj <-
 ipsl_monthly_sum_proj
 ```
 ## separate historical total precip based on 30 yr time periods
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ipsl_historical_tot_1984_2014 <- ipsl_historical_tot %>% 
   filter(year %in% (1984:2014))
   
@@ -276,7 +271,6 @@ ipsl_ssp370_tot_2020_2050 <- ipsl_ssp370_tot %>%
 
 ipsl_ssp585_tot_2020_2050 <- ipsl_ssp585_tot %>% 
   filter(year %in% (2020:2050))
-
 
 ipsl_daily_tot_period <- 
   ggplot() +
@@ -300,9 +294,8 @@ ipsl_daily_tot_period
 
 # ggsave('ipsl_daily_tot_period.png', ipsl_daily_tot_period, width = 12, height = 8, units = "in")
 ```
-
 ## historical 50 year period graph
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ipsl_daily_tot_period_hist <- 
   ggplot() +
   geom_line(data = ipsl_historical_tot_1984_2014, aes(x=date, y=pcp, color="black"), size = 0.5) +  
@@ -318,10 +311,8 @@ ipsl_daily_tot_period_hist <-
 
 ipsl_daily_tot_period_hist
 ```
-
-
 ## ratio of daily total precipitation in the future vs. historical periods
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ## merge the data frames together 
 ipsl_daily_tot_prec_merge1 <- ipsl_ssp126_tot_2020_2050 %>% right_join(ipsl_ssp245_tot_2020_2050, by = c("date")) 
 ipsl_daily_tot_prec_merge2 <- ipsl_daily_tot_prec_merge1 %>%  right_join(ipsl_ssp370_tot_2020_2050, by = c("date"))
@@ -354,98 +345,10 @@ ipsl_ratio_df <- ipsl_merge_his_proj %>%
                names_to = c("ssp"),
                values_to = "fut_hist_ratio")
 
-ggplot(data = ipsl_ratio_df, aes(x=date, y=fut_hist_ratio,  group=ssp)) +
-  geom_boxplot() +
-  facet_wrap(~ssp)
-  #scale_y_continuous(limits = c(0,0.0e+00))
 ```
 
-
-## look at analogeous storm event we will use for swmm 2009-10-11
-```{r}
-ssp_names <- c(
-                    `ssp126_hist` = "ssp 1-2.6",
-                    `ssp245_hist` = "ssp 2-4.5",
-                    `ssp370_hist` = "ssp 3-7.0",
-                    `ssp585_hist` = "ssp 5-8.5"
-                    )
-
-ipsl_merge_his_proj_filt <- ipsl_merge_his_proj %>% 
-  filter(month == "10") %>% 
-  filter(day == "11") %>% 
-  mutate(ssp126_hist = ssp126_pcp/hist_pcp,
-         ssp245_hist = ssp245_pcp/hist_pcp,
-         ssp370_hist = ssp370_pcp/hist_pcp,
-         ssp585_hist = ssp585_pcp/hist_pcp) %>% 
-  select(date, year, month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>% 
-  pivot_longer(cols = ssp126_hist:ssp585_hist,
-               names_to = c("ssp"),
-               values_to = "fut_hist_ratio")
-
-
-proj_hist_oct11_IPSL <- ggplot(data = ipsl_merge_his_proj_filt, aes(x=year, y=fut_hist_ratio,  group=year)) +
-  geom_boxplot() +
-  facet_wrap(~ssp, labeller = as_labeller(ssp_names)) +
-  theme_minimal() +
-  labs(x="Year", 
-       y="Future Projection/Historical Daily Total Ratio (Oct 11)", 
-       caption = "Data Source: IPSL-CM6A-LR") +
-  scale_y_continuous(limits = c(0,30)) +
-    theme(text = element_text(size=15))
-
-proj_hist_oct11_IPSL
-
-# ggsave('proj_hist_oct11_IPSL.png', proj_hist_oct11_IPSL, width = 12, height = 10, units = "in")
-                     
-```
-
-## December 19, 2010 = Wailupe storm that we will use to do CC analysis with. Scrapping Kuliouou Oct 11th, 2009 storm, given we're having issues getting accurate SWMM output that correlated to the stream gage data
-```{r}
-ipsl_merge_his_proj_filt_dec19 <- ipsl_merge_his_proj %>%
-  filter(month == "12") %>%
-  filter(day == "19") %>%
-  group_by(month,day) %>%
-  mutate(ssp126_pcp_avg = mean(ssp126_pcp),
-         ssp245_pcp_avg = mean(ssp245_pcp),
-         ssp370_pcp_avg = mean(ssp370_pcp),
-         ssp585_pcp_avg = mean(ssp585_pcp),
-         hist_pcp_avg = mean(hist_pcp)) %>%
-  select(month,day,ssp126_pcp_avg,ssp245_pcp_avg,ssp370_pcp_avg, ssp585_pcp_avg, hist_pcp_avg ) %>%
-  distinct()
-
-
-ipsl_merge_his_proj_filt_dec19 <- ipsl_merge_his_proj_filt_dec19 %>%
-  mutate(ssp126_hist = ssp126_pcp_avg/hist_pcp_avg,
-         ssp245_hist = ssp245_pcp_avg/hist_pcp_avg,
-         ssp370_hist = ssp370_pcp_avg/hist_pcp_avg,
-         ssp585_hist = ssp585_pcp_avg/hist_pcp_avg) %>%
-  select(month, day, ssp126_hist,ssp245_hist, ssp370_hist, ssp585_hist) %>%
-  pivot_longer(cols = ssp126_hist:ssp585_hist,
-               names_to = c("ssp"),
-               values_to = "fut_hist_ratio")
-
-proj_hist_dec19_ipsl <- ggplot(data = ipsl_merge_his_proj_filt_dec19, aes(x=ssp, y=fut_hist_ratio)) +
-  geom_point(size=2) +
-  theme_minimal() +
-  labs(x="Shared Socioeconomic Pathways (ssp)",
-       y="Future Projection/Historical Daily Total Average Ratio (Dec 19)",
-       caption = "Climate Model: IPSL-CM6A-LR") +
-    theme(text = element_text(size=15)) +
-  scale_x_discrete(labels=c("ssp126_hist" = "ssp 1-2.6",
-                            "ssp245_hist" = "ssp 2-4.5",
-                              "ssp370_hist" = "ssp 3-7.0",
-                            "ssp585_hist" = "ssp 5-8.5")) + 
-  scale_y_continuous(limits = c(0,3.5))
-
-proj_hist_dec19_ipsl
-
-# ggsave('proj_hist_dec19_ipsl.png', proj_hist_dec19_ipsl, width = 12, height = 10, units = "in")
-
-```
-
-
-## March 14, 2009 = Another Wailupe storm that we will use to do CC analysis with. 
-```{r}
+## March 14, 2009 = Wailupe storm that we will use to do CC analysis with. 
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 ipsl_merge_his_proj_filt_mar14 <- ipsl_merge_his_proj %>%
   filter(month == "3") %>%
   filter(day == "14") %>%
@@ -489,46 +392,8 @@ proj_hist_mar14_ipsl
 ```
 
 
-## merging all climate model future/historical ratios for December 19th storm (note: you will need to have run climate_change_analysis.Rmd for all climate models) to plot 
-```{r}
-futhis_ratio_combine_dec19 <- merge_his_proj_filt_dec19 %>%
-  rbind(bcc_merge_his_proj_filt_dec19, ipsl_merge_his_proj_filt_dec19) %>% 
-  mutate(model = c("CNRM"))
-
-futhis_ratio_combine_dec19$model[c(5:8)] = "BCC"
-futhis_ratio_combine_dec19$model[c(9:12)] = "IPSL"
-
-cbp2 <- c("#000000", "#009E73",
-           "#D55E00")
-
-combine_ratio_plot_dec19 <- ggplot(data = futhis_ratio_combine_dec19, aes(x=ssp, y=fut_hist_ratio)) +
-  geom_point(aes(color=model), size =6)+
-  theme_minimal() +
-  labs(x="Shared Socioeconomic Pathways (SSP)",
-       y="Multiplicative Change Factor (MCF)") +
-  ggtitle("December 19th Wailupe Storm Event") +
-    theme(text = element_text(size=22)) +
-  scale_x_discrete(labels=c("ssp126_hist" = "SSP 1-2.6",
-                            "ssp245_hist" = "SSP 2-4.5",
-                              "ssp370_hist" = "SSP 3-7.0",
-                            "ssp585_hist" = "SSP 5-8.5")) + 
- scale_y_continuous(breaks=(seq(0, 3.5, .5)), limits = c(0, 3.5))  +
-  guides(color=guide_legend("CMIP6 Model"))  +
-    theme(legend.position="bottom") +
-   scale_colour_manual(labels = c("BCC-CSM2-MR", "CNRM-ESM2-1", "IPSL-CM6A-LR"), values=cbp2) +
-  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-combine_ratio_plot_dec19
-
-   # ggsave('combine_ratio_plot_dec19_presentation.png', combine_ratio_plot_dec19, width = 16, height = 9, units = "in")
-
-```
-
-
 ## merging all climate model future/historical ratios for March 14th storm (note: you will need to have run climate_change_analysis.Rmd for all climate models) to plot 
-```{r}
+```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide', error = TRUE}
 futhis_ratio_combine_mar14 <- merge_his_proj_filt_mar14 %>%
   rbind(bcc_merge_his_proj_filt_mar14, ipsl_merge_his_proj_filt_mar14) %>% 
   mutate(model = c("CNRM"))
@@ -557,10 +422,8 @@ combine_ratio_plot_mar14 <- ggplot(data = futhis_ratio_combine_mar14, aes(x=ssp,
   theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
   theme(plot.title = element_text(hjust = 0.5))
 
-
 combine_ratio_plot_mar14
 
-     # ggsave('combine_ratio_plot_mar14_presentation.png', combine_ratio_plot_mar14, width = 16, height = 9, units = "in")
+# ggsave('combine_ratio_plot_mar14_presentation.png', combine_ratio_plot_mar14, width = 16, height = 9, units = "in")
 
 ```
-
