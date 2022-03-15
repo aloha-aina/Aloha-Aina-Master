@@ -6,8 +6,9 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
+subtitle: "This is code to display Multiplicative Change Factor figure.(Note: You must run climate_change_analysis_BCC & climate_change_analysis_CNRM before this)"
 ---
-
+NOTE: Figures will be be hidden from knitted markdown.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -15,7 +16,6 @@ library(here)
 library(lubridate)
 library(ggpubr)
 library(zoo)
-library(scales)
 library(ggplot2)
 library(knitr)
 ```

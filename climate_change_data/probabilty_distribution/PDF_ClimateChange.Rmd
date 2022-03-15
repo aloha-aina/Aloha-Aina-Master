@@ -2,9 +2,10 @@
 title: "Probabilty Distribution Function: Climate Change Analysis"
 author: "Elmera Azadpour"
 date: "1/30/2022"
+subtitle: "This is code to create probability distribution figure"
 output: pdf_document
 ---
-
+NOTE: Figures will be be hidden from knitted markdown.
 ```{r setup, include=FALSE}
 library(lubridate)
 library(tidyverse)

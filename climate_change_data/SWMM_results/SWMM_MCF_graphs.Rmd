@@ -4,8 +4,9 @@ author: "Elmera Azadpour"
 date: "1/24/2022"
 output:
   pdf_document: default
+subtitle: "This is code to analyze the climate change scaled results from SWMM and create figures"
 ---
-
+NOTE: Figures will be be hidden from knitted markdown.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) #For data wrangling
@@ -15,7 +16,6 @@ library(stargazer)
 library(kableExtra)
 options(scipen=999)
 ```
-
 # Analysis of simulated vs observed runoff 
 ```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 #Graph observed vs simulated runoff for Max Multiplicative Change Factor (MCF)
