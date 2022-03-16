@@ -10,13 +10,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) #For data wrangling
 library(here)
+library(kableExtra) # for tables
 ```
 
 ```{r}
 #read in data
 subcatch_78runoff <- read.csv(here("LID_Graphs", "subcatchment78_LID_runoff.csv"))
 wailupe_greenroof_top5 <- read.csv(here("LID_Graphs", "wailupe_greenroof_top5.csv"))
-
 ```
 
 
@@ -74,5 +74,37 @@ top5
 
 ggsave("top5.png", top5, width = 20, height = 10, units = "in")
 
+```
+
+## Wailupe Green Roofs Percentile 
+```{r}
+## read in each percent green roof
+wailupe_greenroof_20perc <- read.csv(here("LID_Graphs", "wailupe_green_roofs_20percentresults.csv"))
+wailupe_greenroof_30perc <- read.csv(here("LID_Graphs", "wailupe_green_roofs_30percentresults.csv"))
+wailupe_greenroof_50perc <- read.csv(here("LID_Graphs", "wailupe_green_roofs_50percentresults.csv"))
+```
+
+```{r} 
+wailupe_greenroof_20perc_table <- wailupe_greenroof_20perc %>% 
+  arrange(desc(Runoff.Coefficient)) %>%  
+  kable(col.names=c("Subcatchment","Total Runoff (10$^{6}$ gal)", "Peak Runoff (cfs)", "Runoff Coefficient")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+wailupe_greenroof_20perc_table
+
+
+wailupe_greenroof_30perc_table <- wailupe_greenroof_30perc %>% 
+  arrange(desc(Runoff.Coefficient)) %>%  
+  kable(col.names=c("Subcatchment","Total Runoff (10$^{6}$ gal)", "Peak Runoff (cfs)", "Runoff Coefficient")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+wailupe_greenroof_30perc_table
+
+wailupe_greenroof_50perc_table <- wailupe_greenroof_50perc %>% 
+  arrange(desc(Runoff.Coefficient)) %>%  
+  kable(col.names=c("Subcatchment","Total Runoff (10$^{6}$ gal)", "Peak Runoff (cfs)", "Runoff Coefficient")) %>%
+  kable_styling(bootstrap_options = "striped")
+
+wailupe_greenroof_50perc_table
 ```
 
