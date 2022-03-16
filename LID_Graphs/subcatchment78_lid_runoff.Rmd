@@ -14,8 +14,8 @@ library(here)
 
 ```{r}
 #read in data
-subcatch_78runoff <- read.csv(here("subcatchment78_LID_runoff.csv"))
-wailupe_greenroof_top5 <- read.csv(here("wailupe_greenroof_top5.csv"))
+subcatch_78runoff <- read.csv(here("LID_Graphs", "subcatchment78_LID_runoff.csv"))
+wailupe_greenroof_top5 <- read.csv(here("LID_Graphs", "wailupe_greenroof_top5.csv"))
 
 ```
 
