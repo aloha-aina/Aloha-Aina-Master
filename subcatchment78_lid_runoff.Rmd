@@ -1,0 +1,97 @@
+---
+title: "Subcatchment 78"
+author: "Lauren Skube"
+date: "1/30/2022"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) #For data wrangling
+library(here)
+```
+
+```{r}
+#read in data
+subcatch_78runoff <- read.csv(here("subcatchment78_LID_runoff.csv"))
+
+```
+
+
+```{r}
+#Create graph for subcatchment 78 runoff 
+
+cbp2 <- c("#D55E00","#009E73", "#000000")
+
+runoff_78 <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color = lid_type)) + 
+  geom_line(aes(color=lid_type), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,35), breaks= seq(0,30, by= 5),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,12), breaks= seq(0,12, by= 1),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "Green Roof", "No LID"), values= cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =26))
+
+runoff_78
+
+ggsave("lid_runoff_78.png", runoff_78, width = 16, height = 10, units = "in" )
+  
+```
+```{r}
+# create a graph of wailupe system-wide  runoff results for the different green rood scenarios 
+
+cbp2 <- c("#D55E00","#009E73", "#000000", 'navy')
+
+wailupe_gr_system <- ggplot(wailupe_watershed_greenroof_runoff, aes(x=time, y = runoff_cfs, color = perc_greenroof)) + 
+  geom_line(aes(color=perc_greenroof), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)") +
+   scale_y_continuous(limits= c(0,1000), breaks= seq(0,1000, by= 100),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,7), breaks= seq(0,7, by= 1),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("0 percent", "20 percent", "30 percent", "50 percent"), values= cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =26))
+
+wailupe_gr_system
+
+ggsave("wailupe_gr_runoff.png", wailupe_gr_system, width = 16, height = 10, units = "in" )
+ 
+```
+
+```{r}
+# graph green roof scenarios for top 5 runoff hotspots 
+
+cbp2 <- c("#000000","#D55E00","#009E73", 'blue')
+
+top5 <- ggplot(wailupe_greenroof_top5, aes(x=time, y = runoff_cfs, color = perc_greenroof)) + 
+  geom_line(aes(color=perc_greenroof), size= 1.5)+
+  theme_classic() +
+  facet_wrap(~subcatchment)+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,14), breaks= seq(0,14, by= 2),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,11), breaks= seq(4,11, by= 1),expand= c(0,0))+
+  theme(panel.spacing.x = unit(10, "mm")) +
+  theme(legend.title = element_blank())+
+  theme(legend.position="right") +
+  scale_colour_manual(labels = c("0%", "20%", "30%", "50%"), values= cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =26)) + 
+  theme(
+    legend.position = c(.90, .25),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6)
+    )
+
+top5
+
+ggsave("top5.png", top5, width = 20, height = 10, units = "in")
+
+```
+
