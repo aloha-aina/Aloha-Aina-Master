@@ -15,6 +15,7 @@ library(here)
 ```{r}
 #read in data
 subcatch_78runoff <- read.csv(here("subcatchment78_LID_runoff.csv"))
+wailupe_greenroof_top5 <- read.csv(here("wailupe_greenroof_top5.csv"))
 
 ```
 
@@ -41,28 +42,6 @@ runoff_78
 ggsave("lid_runoff_78.png", runoff_78, width = 16, height = 10, units = "in" )
   
 ```
-```{r}
-# create a graph of wailupe system-wide  runoff results for the different green rood scenarios 
-
-cbp2 <- c("#D55E00","#009E73", "#000000", 'navy')
-
-wailupe_gr_system <- ggplot(wailupe_watershed_greenroof_runoff, aes(x=time, y = runoff_cfs, color = perc_greenroof)) + 
-  geom_line(aes(color=perc_greenroof), size= 1.5)+
-  theme_classic()+
-  labs(x="Time (hours)", y="Discharge (cfs)") +
-   scale_y_continuous(limits= c(0,1000), breaks= seq(0,1000, by= 100),expand= c(0,0))+
-  scale_x_continuous(limits= c(4,7), breaks= seq(0,7, by= 1),expand= c(0,0))+
-  theme(legend.title = element_blank())+
-  theme(legend.position="bottom") +
-  scale_colour_manual(labels = c("0 percent", "20 percent", "30 percent", "50 percent"), values= cbp2) +
-  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
-  theme(text = element_text(size =26))
-
-wailupe_gr_system
-
-ggsave("wailupe_gr_runoff.png", wailupe_gr_system, width = 16, height = 10, units = "in" )
- 
-```
 
 ```{r}
 # graph green roof scenarios for top 5 runoff hotspots 
@@ -72,22 +51,24 @@ cbp2 <- c("#000000","#D55E00","#009E73", 'blue')
 top5 <- ggplot(wailupe_greenroof_top5, aes(x=time, y = runoff_cfs, color = perc_greenroof)) + 
   geom_line(aes(color=perc_greenroof), size= 1.5)+
   theme_classic() +
-  facet_wrap(~subcatchment)+
+  facet_wrap(~subcatchment, scales = "free")+
   labs(x="Time (hours)", y="Discharge (cfs)")+
   scale_y_continuous(limits= c(0,14), breaks= seq(0,14, by= 2),expand= c(0,0))+
-  scale_x_continuous(limits= c(4,11), breaks= seq(4,11, by= 1),expand= c(0,0))+
-  theme(panel.spacing.x = unit(10, "mm")) +
-  theme(legend.title = element_blank())+
+  scale_x_continuous(limits= c(4,11), breaks= seq(4,11, by= 2),expand= c(0,0))+
+  theme(panel.spacing.x = unit(10, "mm"), 
+        panel.spacing.y= unit(10, "mm"),
+        strip.background = element_blank()) +
   theme(legend.position="right") +
-  scale_colour_manual(labels = c("0%", "20%", "30%", "50%"), values= cbp2) +
+  scale_colour_manual(labels = c("0%", "20%", "30%", "50%"), values= cbp2, name = "Percent residential homes \nwith greenroofing") +
   theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
-  theme(text = element_text(size =26)) + 
+  theme(text = element_text(size =28)) + 
   theme(
-    legend.position = c(.90, .25),
+    legend.position = c(.98, .38),
     legend.justification = c("right", "top"),
     legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6)
-    )
+    legend.margin = margin(6, 6, 6, 6), 
+    legend.key.size = unit(1.5, "cm"),
+    legend.title=element_text(size=28)) 
 
 top5
 
