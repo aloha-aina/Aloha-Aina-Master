@@ -49,9 +49,9 @@ ggsave("lid_runoff_78.png", runoff_78, width = 16, height = 10, units = "in" )
 cbp2 <- c("#000000","#D55E00","#009E73", 'blue')
 
 top5 <- ggplot(wailupe_greenroof_top5, aes(x=time, y = runoff_cfs, color = perc_greenroof)) + 
-  geom_line(aes(color=perc_greenroof), size= 1.5)+
+  geom_line(aes(color=perc_greenroof), size= 1.25)+
   theme_classic() +
-  facet_wrap(~subcatchment, scales = "free")+
+  facet_wrap(~factor(subcatchment, levels=c('Subcatchment 67','Subcatchment 68','Subcatchment 45','Subcatchment 47', 'Subcatchment 60')), scales = "free")+ # arrange by 67, 68, 45, 47, 60  
   labs(x="Time (hours)", y="Discharge (cfs)")+
   scale_y_continuous(limits= c(0,14), breaks= seq(0,14, by= 2),expand= c(0,0))+
   scale_x_continuous(limits= c(4,11), breaks= seq(4,11, by= 2),expand= c(0,0))+
