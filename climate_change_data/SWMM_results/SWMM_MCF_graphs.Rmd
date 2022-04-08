@@ -13,7 +13,8 @@ library(tidyverse) #For data wrangling
 library(here)
 library(hydroGOF)
 library(stargazer)
-library(kableExtra)
+library(kableExtra) # for knitting to html
+library(gganimate) # for creating gif of simulated and observed discharge with MCF applied
 options(scipen=999)
 ```
 # Analysis of simulated vs observed runoff 
@@ -96,6 +97,27 @@ calibrate_graph <- ggplot()+
 calibrate_graph
 
 # ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
+
+
+calibrate_graph_animate <- ggplot()+
+  geom_line(data = discharge_MCF_min, aes(x=time_step, y=discharge_obs_cfs), color="#000000", size =2.5) +
+  geom_line(data= discharge_MCF_min, aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size =2.5)+
+  geom_line(data= discharge_MCF_max, aes(x=time_step, y=simulated_flow_cfs), color= "#D55E00", size = 2.5) +
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,850), breaks= seq(0,850, by= 100),expand= c(0,0))+
+  scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  annotate("text", label= "Observed", x=10.5, y=200, size=9)+
+  annotate("text", label= "Max MCF Simulated", x=10.5, y=655, size=9) +
+   annotate("text", label= "Min MCF Simulated", x=10.5, y=55, size=9) + 
+  theme(text = element_text(size=25)) +
+    transition_reveal(time_step)
+
+calibrate_graph_animate
+
+# animate in a two step process:
+animate(calibrate_graph_animate, height = 800, width =1000, renderer = gifski_renderer(loop = FALSE))
+anim_save("calibrate_graph_animate.gif")
 ```
 
 ## Analysis of MCF max storm results
