@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) #For data wrangling
 library(here)
 library(kableExtra) # for tables
+library(gganimate) # for creating gif
 ```
 
 ```{r}
@@ -40,7 +41,27 @@ runoff_78 <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color = lid_t
 runoff_78
 
 ggsave("lid_runoff_78.png", runoff_78, width = 16, height = 10, units = "in" )
-  
+
+## animated plot
+
+runoff_78_animate <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color = lid_type)) + 
+  geom_line(aes(color=lid_type), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,35), breaks= seq(0,30, by= 5),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,12), breaks= seq(0,12, by= 1),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "Green Roof", "No LID"), values= cbp2) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =26)) +
+    transition_reveal(time)
+
+runoff_78_animate
+
+# animate in a two step process:
+ animate(runoff_78_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+  # anim_save("runoff_78_animate.gif")  
 ```
 
 ```{r}
