@@ -111,13 +111,21 @@ calibrate_graph_animate <- ggplot()+
   annotate("text", label= "Max MCF Simulated", x=10.5, y=655, size=9) +
    annotate("text", label= "Min MCF Simulated", x=10.5, y=55, size=9) + 
   theme(text = element_text(size=25)) +
-    transition_reveal(time_step)
+    transition_reveal(time_step) +
+    theme(
+      panel.background = element_rect(fill = "transparent", colour = NA) # bg of the panel
+      , plot.background = element_rect(fill = "transparent", colour = NA) # bg of the plot
+      , panel.grid.major = element_blank() # get rid of major grid
+      , panel.grid.minor = element_blank() # get rid of minor grid
+      , legend.background = element_rect(fill = "transparent", colour = NA) # get rid of legend bg
+      , legend.box.background = element_rect(fill = "transparent", colour = NA) # get rid of legend panel bg
+    )
 
 calibrate_graph_animate
 
 # animate in a two step process:
-animate(calibrate_graph_animate, height = 800, width =1000, renderer = gifski_renderer(loop = FALSE))
-anim_save("calibrate_graph_animate.gif")
+ animate(calibrate_graph_animate, height = 800, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+ # anim_save("calibrate_graph_animate.gif")
 ```
 
 ## Analysis of MCF max storm results
