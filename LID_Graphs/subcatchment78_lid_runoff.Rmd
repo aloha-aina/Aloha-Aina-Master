@@ -60,7 +60,7 @@ runoff_78_animate <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color
 runoff_78_animate
 
 # animate in a two step process:
- animate(runoff_78_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+ # animate(runoff_78_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
   # anim_save("runoff_78_animate.gif")  
 ```
 
@@ -127,5 +127,65 @@ wailupe_greenroof_50perc_table <- wailupe_greenroof_50perc %>%
   kable_styling(bootstrap_options = "striped")
 
 wailupe_greenroof_50perc_table
+```
+
+
+## GI graph for publics, sub 78 runoff with no lid vs greenroof + permeable pavement 
+```{r}
+## black = no lid 
+## blue = combined = #03989E
+
+cp3 <- c("#03989E", "#000000")
+
+subcatch_78runoff_nolid_comb <- subcatch_78runoff %>% 
+  filter(lid_type %in% c("no_lid", "combined"))
+
+# to export sub 78 df with just no_lid and combined greenroof and permeable pavement 
+# write.csv(subcatch_78runoff_nolid_comb, "subcatch_78runoff_nolid_comb.csv")
+
+runoff_78_nolid_comb <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time, y = runoff_cfs, color = lid_type)) + 
+  geom_line(aes(color=lid_type), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,32), breaks= seq(0,30, by= 10),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "No Green Infastructure"), values= cp3) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =38))
+
+runoff_78_nolid_comb
+
+# ggsave("runoff_78_nolid_comb.png", runoff_78_nolid_comb, width = 16, height = 10, units = "in" )
+
+## animated plot for publics
+runoff_78_nolid_comb_animate <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time, y = runoff_cfs, color = lid_type)) + 
+  geom_line(aes(color=lid_type), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,32), breaks= seq(0,30, by= 10),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "No Green Infastructure"), values= cp3) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size=38)) +
+  transition_reveal(time) +
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    panel.grid.major = element_blank(), # get rid of major grid
+    panel.grid.minor = element_blank(), # get rid of minor grid
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+  )
+
+runoff_78_nolid_comb_animate
+
+# animate in a two step process:
+ animate(runoff_78_nolid_comb_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+
+ # anim_save("runoff_78_nolid_comb_animate.gif") 
+
 ```
 
