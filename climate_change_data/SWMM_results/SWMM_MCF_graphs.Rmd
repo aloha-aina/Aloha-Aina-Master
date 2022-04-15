@@ -17,6 +17,7 @@ library(kableExtra) # for knitting to html
 library(gganimate) # for creating gif of simulated and observed discharge with MCF applied
 options(scipen=999)
 ```
+
 # Analysis of simulated vs observed runoff 
 ```{r, fig.show='hide', message = FALSE, warning = FALSE, results = 'hide'}
 #Graph observed vs simulated runoff for Max Multiplicative Change Factor (MCF)
@@ -99,24 +100,58 @@ calibrate_graph
 # ggsave('discharge_mar14_MCF.png', calibrate_graph, width = 16, height = 9, units = "in")
 
 
+## animated plot for publics presentation 
 calibrate_graph_animate <- ggplot()+
   geom_line(data = discharge_MCF_min, aes(x=time_step, y=discharge_obs_cfs), color="#000000", size =2.5) +
   geom_line(data= discharge_MCF_min, aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size =2.5)+
   geom_line(data= discharge_MCF_max, aes(x=time_step, y=simulated_flow_cfs), color= "#D55E00", size = 2.5) +
   theme_classic()+
-  labs(x="Time (hours)", y="Discharge (cfs)")+
+  labs(x="Time (hours)", y="Discharge (cubic feet / second)")+
   scale_y_continuous(limits= c(0,850), breaks= seq(0,850, by= 100),expand= c(0,0))+
   scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
-  annotate("text", label= "Observed", x=10.5, y=200, size=9)+
-  annotate("text", label= "Max MCF Simulated", x=10.5, y=655, size=9) +
-   annotate("text", label= "Min MCF Simulated", x=10.5, y=55, size=9) + 
-  theme(text = element_text(size=25)) +
+  annotate("text", label= "Observed", x=10, y=200, size=9)+
+  annotate("text", label= "Max Scaled Simulation", x=10, y=655, size=9) +
+   annotate("text", label= "Min Scaled Simulation", x=10, y=55, size=9) + 
+  theme(text = element_text(size=23)) +
     transition_reveal(time_step)
+
 calibrate_graph_animate
 
 # animate in a two step process:
  animate(calibrate_graph_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
- # anim_save("calibrate_graph_animate.gif")
+   # anim_save("calibrate_graph_animate.gif")
+ 
+ 
+ ## combine all three lines onto one graph for easabilty, another (possible) version for publics
+calibrate_graph_v2 <- ggplot()+
+  geom_line(data = discharge_MCF_min, aes(x=time_step, y=discharge_obs_cfs), color="#000000", size =2.5) +
+  geom_line(data= discharge_MCF_min, aes(x=time_step, y=simulated_flow_cfs), color= "#009E73", size =2.5)+
+  geom_line(data= discharge_MCF_max, aes(x=time_step, y=simulated_flow_cfs), color= "#D55E00", size = 2.5) +
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cubic feet / second)")+
+  scale_y_continuous(limits= c(0,850), breaks= seq(0,850, by= 100),expand= c(0,0))+
+  scale_x_continuous(limits= c(0,12), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  annotate("text", label= "Observed", x=10, y=200, size=8, color = "white")+
+  annotate("text", label= "Max Scaled Simulation", x=10, y=655, size=8, color = "white") +
+   annotate("text", label= "Min Scaled Simulation", x=10, y=55, size=8, color = "white") + 
+  theme(text = element_text(size=22))  +
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    panel.grid.major = element_blank(), # get rid of major grid
+    panel.grid.minor = element_blank(), # get rid of minor grid
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent"),  # get rid of legend panel bg +
+  axis.line = element_line(colour = "white"),
+  axis.title.x = element_text(color="white"),
+  axis.title.y = element_text(color="white"),
+  axis.text.x= element_text(color = "white"),
+  axis.text.y= element_text(color = "white"),
+  axis.ticks = element_line(colour = "white"))
+
+calibrate_graph_v2
+
+  # ggsave('discharge_mar14_MCF_transparent.png', calibrate_graph_v2, width = 14, height = 11, units = "in")
 ```
 
 ## Analysis of MCF max storm results
