@@ -163,7 +163,7 @@ runoff_78_nolid_comb
 runoff_78_nolid_comb_animate <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time, y = runoff_cfs, color = lid_type)) + 
   geom_line(aes(color=lid_type), size= 1.5)+
   theme_classic()+
-  labs(x="Time (hours)", y="Discharge (cfs)")+
+  labs(x="Time (hours)", y="Discharge (cubic feet / second)")+
   scale_y_continuous(limits= c(0,32), breaks= seq(0,30, by= 10),expand= c(0,0))+
   scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
   theme(legend.title = element_blank())+
@@ -187,5 +187,39 @@ runoff_78_nolid_comb_animate
 
  # anim_save("runoff_78_nolid_comb_animate.gif") 
 
+```
+```{r}
+runoff_78_nolid_comb_v2 <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time, y = runoff_cfs, color = lid_type)) + 
+  geom_line(aes(color=lid_type), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cubic feet / second)")+
+  scale_y_continuous(limits= c(0,32), breaks= seq(0,30, by= 10),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  guides(color = guide_legend(override.aes = list(size = 3))) + # changes line thickness on legend
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "No Green Infastructure"), values= cp3) +
+  theme(text=element_text(color="white"),
+        axis.text=element_text(color="white")) +
+  theme(text = element_text(size =38)) +
+  theme(
+    panel.background = element_rect(fill = "transparent"), # bg of the panel
+    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+    panel.grid.major = element_blank(), # get rid of major grid
+    panel.grid.minor = element_blank(), # get rid of minor grid
+    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent", colour="transparent"),  # get rid of legend panel bg +
+  axis.line = element_line(colour = "white"),
+  axis.title.x = element_text(color="white"),
+  axis.title.y = element_text(color="white"),
+  axis.text.x= element_text(color = "white"),
+  axis.text.y= element_text(color = "white"),
+  axis.ticks = element_line(colour = "white"))
+
+
+runoff_78_nolid_comb_v2
+
+
+# ggsave('runoff_78_nolid_comb_v2.png', runoff_78_nolid_comb_v2, width = 14, height = 11, units = "in")
 ```
 
