@@ -47,7 +47,7 @@ ggsave("lid_runoff_78.png", runoff_78, width = 16, height = 10, units = "in" )
 runoff_78_animate <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color = lid_type)) + 
   geom_line(aes(color=lid_type), size= 1.5)+
   theme_classic()+
-  labs(x="Time (hours)", y="Discharge (cfs)")+
+  labs(x="Time (hours)", y="Discharge (cubic feet / second)")+
   scale_y_continuous(limits= c(0,35), breaks= seq(0,30, by= 5),expand= c(0,0))+
   scale_x_continuous(limits= c(4,12), breaks= seq(0,12, by= 1),expand= c(0,0))+
   theme(legend.title = element_blank())+
@@ -60,8 +60,8 @@ runoff_78_animate <- ggplot(subcatch_78runoff, aes(x=time, y = runoff_cfs, color
 runoff_78_animate
 
 # animate in a two step process:
- # animate(runoff_78_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
-  # anim_save("runoff_78_animate.gif")  
+  # animate(runoff_78_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+   # anim_save("runoff_78_animate.gif")  
 ```
 
 ```{r}
@@ -167,27 +167,31 @@ runoff_78_nolid_comb_animate <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time,
   scale_y_continuous(limits= c(0,32), breaks= seq(0,30, by= 10),expand= c(0,0))+
   scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
   theme(legend.title = element_blank())+
+  guides(color = guide_legend(override.aes = list(size = 3))) + # changes line thickness on legend
   theme(legend.position="bottom") +
   scale_colour_manual(labels = c("Green Roof + Permeable Pavement", "No Green Infastructure"), values= cp3) +
   theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
   theme(text = element_text(size=38)) +
-  transition_reveal(time) +
-  theme(
-    panel.background = element_rect(fill = "transparent"), # bg of the panel
-    plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
-    panel.grid.major = element_blank(), # get rid of major grid
-    panel.grid.minor = element_blank(), # get rid of minor grid
-    legend.background = element_rect(fill = "transparent"), # get rid of legend bg
-  )
+  transition_reveal(time) 
+# +
+#   theme(
+#     panel.background = element_rect(fill = "transparent"), # bg of the panel
+#     plot.background = element_rect(fill = "transparent", color = NA), # bg of the plot
+#     panel.grid.major = element_blank(), # get rid of major grid
+#     panel.grid.minor = element_blank(), # get rid of minor grid
+#     legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+#   )
 
 runoff_78_nolid_comb_animate
 
 # animate in a two step process:
  animate(runoff_78_nolid_comb_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
 
- # anim_save("runoff_78_nolid_comb_animate.gif") 
+  anim_save("runoff_78_nolid_comb_animate.gif") 
 
 ```
+
+## static graph 
 ```{r}
 runoff_78_nolid_comb_v2 <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time, y = runoff_cfs, color = lid_type)) + 
   geom_line(aes(color=lid_type), size= 1.5)+
