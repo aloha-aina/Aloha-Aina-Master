@@ -185,9 +185,9 @@ runoff_78_nolid_comb_animate <- ggplot(subcatch_78runoff_nolid_comb, aes(x=time,
 runoff_78_nolid_comb_animate
 
 # animate in a two step process:
- animate(runoff_78_nolid_comb_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
+ # animate(runoff_78_nolid_comb_animate, height = 900, width =1000, renderer = gifski_renderer(loop = FALSE), bg = 'transparent')
 
-  anim_save("runoff_78_nolid_comb_animate.gif") 
+ #  anim_save("runoff_78_nolid_comb_animate.gif") 
 
 ```
 
@@ -225,5 +225,31 @@ runoff_78_nolid_comb_v2
 
 
 # ggsave('runoff_78_nolid_comb_v2.png', runoff_78_nolid_comb_v2, width = 14, height = 11, units = "in")
+```
+
+
+## max and min MCF similations with green infastructure 
+```{r}
+subcatchment78_minMCF <- read.csv(here("LID_Graphs", "subcatch78_min_mcf.csv"))
+subcatchment78_maxMCF <- read.csv(here("LID_Graphs", "subcatch78_max_mcf.csv"))
+
+cp3 <- c("#000000", "#03989E")
+
+subcatchment78_minMCF_plot <- ggplot(subcatchment78_minMCF, aes(x=time, y = runoff_cfs, color = scenario)) +  geom_line(aes(color=scenario), size= 1.5)+
+  theme_classic()+
+  labs(x="Time (hours)", y="Discharge (cfs)")+
+  scale_y_continuous(limits= c(0,10), breaks= seq(0,10, by= 2),expand= c(0,0))+
+  scale_x_continuous(limits= c(4,11), breaks= seq(0,12, by= 2),expand= c(0,0))+
+  theme(legend.title = element_blank())+
+  theme(legend.position="bottom") +
+  scale_colour_manual(labels = c("No Green Infrastructure", "Green Roof + Permeable Pavement"), values= cp3) +
+  theme(text=element_text(color="black"),axis.text=element_text(color="black")) +
+  theme(text = element_text(size =38)) +
+  guides(color = guide_legend(override.aes = list(size = 3)))  # changes line thickness on legend
+
+subcatchment78_minMCF_plot
+
+
+# ggsave("runoff_78_nolid_comb.png", runoff_78_nolid_comb, width = 16, height = 10, units = "in" )
 ```
 
